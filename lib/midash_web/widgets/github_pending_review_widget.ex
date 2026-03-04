@@ -39,22 +39,22 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
   def render(assigns) do
     ~H"""
     <div>
-      <div :if={@loading} class="text-gray-600 text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-red-500 text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-gray-600 text-xs">no prs need review</div>
+        <div :if={@prs == []} class="text-muted-foreground text-xs">no prs need review</div>
         <div :if={@prs != []} class="space-y-3">
           <%= for pr <- @prs do %>
-            <div class="border-l border-gray-700 pl-3">
+            <div class="border-l border-border pl-3">
               <a
                 href={pr["html_url"]}
                 target="_blank"
-                class="text-xs text-blue-400 hover:text-blue-300 block mb-1"
+                class="text-xs text-info hover:text-info/80 block mb-1"
               >
-                <span class="text-gray-500">#<%= pr["number"] %></span>
+                <span class="text-muted-foreground">#<%= pr["number"] %></span>
                 {pr["title"]}
               </a>
-              <div class="flex gap-3 text-xs text-gray-600">
+              <div class="flex gap-3 text-xs text-muted-foreground">
                 <span>@{pr["author"]}</span>
                 <span>+{pr[:approvals]} approvals</span>
                 <span>{relative_time(pr["created_at"])}</span>

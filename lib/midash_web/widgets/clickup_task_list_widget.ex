@@ -44,25 +44,25 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
 
     ~H"""
     <div>
-      <div :if={@loading} class="text-gray-600 text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-red-500 text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <%= for s <- @statuses do %>
           <% status_tasks = Clickup.filter_by_status(@tasks, s.key) %>
           <div :if={status_tasks != []} class="mb-4">
-            <div class={"text-xs uppercase tracking-widest mb-2 #{s.color}"}>{s.label}</div>
+            <div class="text-xs uppercase tracking-widest mb-2" style={"color: #{s.color}"}>{s.label}</div>
             <div class="space-y-1">
               <%= for task <- status_tasks do %>
                 <div class="flex items-start gap-2">
-                  <span class="text-gray-700 text-xs shrink-0 mt-0.5">—</span>
+                  <span class="text-border text-xs shrink-0 mt-0.5">—</span>
                   <a
                     href={task["url"]}
                     target="_blank"
-                    class="text-xs text-gray-300 hover:text-gray-100 leading-snug"
+                    class="text-xs text-foreground hover:text-foreground/90 leading-snug"
                   >
                     {task["name"]}
                   </a>
-                  <span :if={task["due_date"]} class="text-gray-600 text-xs shrink-0 ml-auto">
+                  <span :if={task["due_date"]} class="text-muted-foreground text-xs shrink-0 ml-auto">
                     {Clickup.format_due(task["due_date"])}
                   </span>
                 </div>
@@ -71,7 +71,7 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
           </div>
         <% end %>
 
-        <div :if={@tasks == []} class="text-gray-600 text-xs">no tasks</div>
+        <div :if={@tasks == []} class="text-muted-foreground text-xs">no tasks</div>
       </div>
     </div>
     """

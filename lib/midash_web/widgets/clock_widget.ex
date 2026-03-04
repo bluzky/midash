@@ -19,10 +19,10 @@ defmodule MidashWeb.Widgets.ClockWidget do
   def render(assigns) do
     ~H"""
     <div class="text-center py-2">
-      <div class="text-3xl font-mono tabular-nums text-gray-100 tracking-tight">
+      <div class="text-3xl font-mono tabular-nums text-foreground tracking-tight">
         {@time}
       </div>
-      <div class="text-xs text-gray-600 mt-1">
+      <div class="text-xs text-muted-foreground mt-1">
         {@date}
       </div>
     </div>

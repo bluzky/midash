@@ -4,11 +4,11 @@ defmodule Midash.Clickup do
   """
 
   @statuses [
-    %{key: "testing failed", label: "testing failed", color: "text-red-400"},
-    %{key: "in progress", label: "in progress", color: "text-amber-400"},
-    %{key: "in review", label: "in review", color: "text-violet-400"},
-    %{key: "dev ready", label: "dev ready", color: "text-emerald-400"},
-    %{key: "verified", label: "verified", color: "text-cyan-400"}
+    %{key: "testing failed", label: "testing failed", color: "#f87171"},
+    %{key: "in progress", label: "in progress", color: "#fbbf24"},
+    %{key: "in review", label: "in review", color: "#a78bfa"},
+    %{key: "dev ready", label: "dev ready", color: "#34d399"},
+    %{key: "verified", label: "verified", color: "#22d3ee"}
   ]
 
   def statuses, do: @statuses

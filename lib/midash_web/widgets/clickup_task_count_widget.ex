@@ -44,15 +44,15 @@ defmodule MidashWeb.Widgets.ClickupTaskCountWidget do
 
     ~H"""
     <div>
-      <div :if={@loading} class="text-gray-600 text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-red-500 text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <div class="flex gap-2 flex-wrap">
           <%= for s <- @statuses do %>
             <% count = Clickup.count_by_status(@tasks, s.key) %>
-            <div class="border border-gray-800 px-3 py-2 text-center min-w-20">
-              <div class="text-xs text-gray-600">{s.label}</div>
-              <div class={"text-2xl tabular-nums #{s.color}"}>{count}</div>
+            <div class="border border-border px-3 py-2 text-center min-w-20">
+              <div class="text-xs text-muted-foreground">{s.label}</div>
+              <div class="text-2xl tabular-nums" style={"color: #{s.color}"}>{count}</div>
             </div>
           <% end %>
         </div>

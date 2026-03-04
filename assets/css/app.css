@@ -4,8 +4,39 @@
 
 /* This file is for your main application CSS */
 
+@layer base {
+  :root {
+    --background: 0 0% 5%;          /* #0d0d0d */
+    --foreground: 220 9% 82%;       /* ~gray-300 #d1d5db */
+
+    --card: 0 0% 8%;                /* #141414 */
+    --card-foreground: 220 9% 82%;
+
+    --primary: 18 98% 50%;          /* brand #FD4F00 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 220 9% 82%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 220 9% 46%; /* ~gray-500 */
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 220 9% 82%;
+
+    --destructive: 0 84% 60%;      /* ~red-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 16%;             /* ~gray-800 */
+    --input: 0 0% 16%;
+    --ring: 18 98% 50%;
+
+    --success: 160 84% 39%;         /* ~green-400 */
+    --warning: 38 92% 50%;          /* ~amber-500 */
+    --info: 217 91% 60%;            /* ~blue-400 */
+  }
+}
+
 body {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  background-color: #0d0d0d;
-  color: #d1d5db;
+  @apply bg-background text-foreground font-mono;
 }

@@ -39,7 +39,7 @@ defmodule MidashWeb.DashboardComponents do
 
   def dashboard_layout(assigns) do
     ~H"""
-    <div class="min-h-screen bg-[#0d0d0d] text-gray-300 font-mono">
+    <div class="min-h-screen bg-background text-foreground font-mono">
       <.dashboard_nav current={@current} pages={@nav_pages} />
       <div class="flex gap-4 p-4 items-start">
         {render_slot(@inner_block)}
@@ -58,16 +58,16 @@ defmodule MidashWeb.DashboardComponents do
 
   def dashboard_nav(assigns) do
     ~H"""
-    <nav class="flex items-center border-b border-gray-800 bg-[#0d0d0d] px-4">
-      <span class="text-gray-600 text-xs mr-4 select-none">midash</span>
+    <nav class="flex items-center border-b border-border bg-background px-4">
+      <span class="text-muted-foreground text-xs mr-4 select-none">midash</span>
       <%= for page <- @pages do %>
         <.link
           navigate={page.path}
           class={[
             "px-3 py-3 text-sm border-b-2 -mb-px transition-colors whitespace-nowrap",
             if(page.id == @current,
-              do: "border-gray-300 text-gray-100",
-              else: "border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600"
+              do: "border-foreground text-foreground",
+              else: "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
             )
           ]}
         >
@@ -111,17 +111,17 @@ defmodule MidashWeb.DashboardComponents do
 
   def widget(assigns) do
     ~H"""
-    <div class={["mb-4 border border-gray-800 bg-[#141414] last:mb-0", @class]}>
+    <div class={["mb-4 border border-border bg-card last:mb-0", @class]}>
       <div
         :if={@title}
-        class="px-3 py-2 border-b border-gray-800 text-xs text-gray-500 uppercase tracking-widest flex items-center justify-between"
+        class="px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-widest flex items-center justify-between"
       >
         <span>— {@title}</span>
         <span :if={@on_refresh || @collapsible} class="flex items-center gap-1">
           <button
             :if={@on_refresh}
             phx-click={@on_refresh}
-            class="text-gray-600 hover:text-gray-300 transition-colors p-0.5"
+            class="text-muted-foreground hover:text-foreground transition-colors p-0.5"
             title="refresh"
           >
             <svg
@@ -140,7 +140,7 @@ defmodule MidashWeb.DashboardComponents do
           <button
             :if={@collapsible}
             phx-click={Phoenix.LiveView.JS.toggle(to: "##{@id}-content")}
-            class="text-gray-600 hover:text-gray-300 transition-colors p-0.5"
+            class="text-muted-foreground hover:text-foreground transition-colors p-0.5"
             title="collapse"
           >
             <svg

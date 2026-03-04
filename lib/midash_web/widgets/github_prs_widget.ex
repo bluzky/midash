@@ -38,19 +38,19 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
   def render(assigns) do
     ~H"""
     <div>
-      <div :if={@loading} class="text-gray-600 text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-red-500 text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-gray-600 text-xs">no open prs</div>
+        <div :if={@prs == []} class="text-muted-foreground text-xs">no open prs</div>
         <div :if={@prs != []} class="flex flex-wrap gap-3">
           <%= for {author, count} <- pr_by_author(@prs) do %>
             <a
               href={"https://github.com/#{@repo}/pulls?q=is:pr+is:open+author:#{author}+base:#{@base}"}
               target="_blank"
-              class="flex flex-col items-center border border-gray-700 px-3 py-2 hover:border-gray-500 transition-colors min-w-16"
+              class="flex flex-col items-center border border-border px-3 py-2 hover:border-muted-foreground transition-colors min-w-16"
             >
-              <span class="text-xs text-gray-400">{author}</span>
-              <span class="text-xl text-green-400 tabular-nums">{count}</span>
+              <span class="text-xs text-muted-foreground">{author}</span>
+              <span class="text-xl text-success tabular-nums">{count}</span>
             </a>
           <% end %>
         </div>
