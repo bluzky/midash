@@ -97,10 +97,16 @@ defmodule MidashWeb.DashboardComponents do
   @doc """
   Widget card: optional title bar + content area.
 
+  - `id` - unique identifier (required when `collapsible` is true)
   - `title` - optional string shown in header
+  - `on_refresh` - a `%JS{}` command to run when the refresh button is clicked (shows button when set)
+  - `collapsible` - show a collapse/expand toggle in the title bar (default false)
   """
+  attr :id, :string, default: nil
   attr :title, :string, default: nil
   attr :class, :string, default: nil
+  attr :on_refresh, :any, default: nil
+  attr :collapsible, :boolean, default: false
   slot :inner_block, required: true
 
   def widget(assigns) do
@@ -108,11 +114,51 @@ defmodule MidashWeb.DashboardComponents do
     <div class={["mb-4 border border-gray-800 bg-[#141414] last:mb-0", @class]}>
       <div
         :if={@title}
-        class="px-3 py-2 border-b border-gray-800 text-xs text-gray-500 uppercase tracking-widest"
+        class="px-3 py-2 border-b border-gray-800 text-xs text-gray-500 uppercase tracking-widest flex items-center justify-between"
       >
-        — {@title}
+        <span>— {@title}</span>
+        <span :if={@on_refresh || @collapsible} class="flex items-center gap-1">
+          <button
+            :if={@on_refresh}
+            phx-click={@on_refresh}
+            class="text-gray-600 hover:text-gray-300 transition-colors p-0.5"
+            title="refresh"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              class="w-3 h-3"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M13.836 2.477a.75.75 0 0 1 .75.75v3.182a.75.75 0 0 1-.75.75h-3.182a.75.75 0 0 1 0-1.5h1.37l-.84-.841a4.5 4.5 0 0 0-7.08.681.75.75 0 0 1-1.3-.75 6 6 0 0 1 9.44-.908l.84.84V3.227a.75.75 0 0 1 .75-.75Zm-.911 7.5A.75.75 0 0 1 13.199 11a6 6 0 0 1-9.44.908l-.84-.84v1.769a.75.75 0 0 1-1.5 0V9.637a.75.75 0 0 1 .75-.75h3.182a.75.75 0 0 1 0 1.5H3.98l.841.841a4.5 4.5 0 0 0 7.08-.681.75.75 0 0 1 1.025-.274Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            :if={@collapsible}
+            phx-click={Phoenix.LiveView.JS.toggle(to: "##{@id}-content")}
+            class="text-gray-600 hover:text-gray-300 transition-colors p-0.5"
+            title="collapse"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              class="w-3 h-3"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </span>
       </div>
-      <div class="p-3">
+      <div id={if @id, do: "#{@id}-content"} class="p-3">
         {render_slot(@inner_block)}
       </div>
     </div>

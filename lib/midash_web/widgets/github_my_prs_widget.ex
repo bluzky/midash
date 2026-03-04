@@ -31,6 +31,11 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
   end
 
   @impl true
+  def handle_event("refresh", _, socket) do
+    {:noreply, socket |> assign(loading: true) |> fetch_my_prs()}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div>

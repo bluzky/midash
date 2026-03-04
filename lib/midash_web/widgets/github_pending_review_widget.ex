@@ -12,7 +12,7 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
 
   @impl true
   def mount(socket) do
-    {:ok, assign(socket, prs: [], loading: true, error: nil, open: false)}
+    {:ok, assign(socket, prs: [], loading: true, error: nil)}
   end
 
   @impl true
@@ -31,8 +31,8 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
   end
 
   @impl true
-  def handle_event("toggle", _, socket) do
-    {:noreply, assign(socket, open: !socket.assigns.open)}
+  def handle_event("refresh", _, socket) do
+    {:noreply, socket |> assign(loading: true) |> fetch_pending()}
   end
 
   @impl true
@@ -43,34 +43,24 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
       <div :if={@error} class="text-red-500 text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <div :if={@prs == []} class="text-gray-600 text-xs">no prs need review</div>
-        <div :if={@prs != []}>
-          <button
-            phx-click="toggle"
-            phx-target={@myself}
-            class="text-xs text-gray-500 hover:text-gray-300 mb-2 flex items-center gap-1"
-          >
-            <span class={if @open, do: "rotate-90 inline-block", else: "inline-block"}>▶</span>
-            {length(@prs)} prs — show/hide
-          </button>
-          <div :if={@open} class="space-y-3">
-            <%= for pr <- @prs do %>
-              <div class="border-l border-gray-700 pl-3">
-                <a
-                  href={pr["html_url"]}
-                  target="_blank"
-                  class="text-xs text-blue-400 hover:text-blue-300 block mb-1"
-                >
-                  <span class="text-gray-500">#<%= pr["number"] %></span>
-                  {pr["title"]}
-                </a>
-                <div class="flex gap-3 text-xs text-gray-600">
-                  <span>@{pr["author"]}</span>
-                  <span>+{pr[:approvals]} approvals</span>
-                  <span>{relative_time(pr["created_at"])}</span>
-                </div>
+        <div :if={@prs != []} class="space-y-3">
+          <%= for pr <- @prs do %>
+            <div class="border-l border-gray-700 pl-3">
+              <a
+                href={pr["html_url"]}
+                target="_blank"
+                class="text-xs text-blue-400 hover:text-blue-300 block mb-1"
+              >
+                <span class="text-gray-500">#<%= pr["number"] %></span>
+                {pr["title"]}
+              </a>
+              <div class="flex gap-3 text-xs text-gray-600">
+                <span>@{pr["author"]}</span>
+                <span>+{pr[:approvals]} approvals</span>
+                <span>{relative_time(pr["created_at"])}</span>
               </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

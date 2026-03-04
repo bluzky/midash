@@ -34,6 +34,11 @@ defmodule MidashWeb.Widgets.ClickupTaskCountWidget do
   end
 
   @impl true
+  def handle_event("refresh", _, socket) do
+    {:noreply, socket |> assign(loading: true) |> fetch_tasks()}
+  end
+
+  @impl true
   def render(assigns) do
     assigns = assign(assigns, :statuses, @statuses)
 

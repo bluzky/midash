@@ -25,35 +25,35 @@ defmodule MidashWeb.HomeLive do
     ~H"""
     <.dashboard_layout nav_pages={@nav_pages} current={:home}>
       <.col size={:small}>
-        <.widget title="clock">
+        <.widget id="w-home-clock" title="clock" collapsible>
           <.live_component module={ClockWidget} id="home-clock" />
         </.widget>
 
-        <.widget title="bookmarks">
+        <.widget id="w-home-bookmarks" title="bookmarks" collapsible>
           <.live_component module={PlaceholderWidget} id="home-bookmarks"
             message="your bookmarks" />
         </.widget>
       </.col>
 
       <.col size={:full}>
-        <.widget title="notes">
+        <.widget id="w-home-notes" title="notes" collapsible>
           <.live_component module={PlaceholderWidget} id="home-notes"
             message="your notes widget goes here" />
         </.widget>
 
-        <.widget title="hacker news">
+        <.widget id="w-home-hn" title="hacker news" collapsible>
           <.live_component module={PlaceholderWidget} id="home-hn"
             message="hacker news feed" />
         </.widget>
       </.col>
 
       <.col size={:small}>
-        <.widget title="markets">
+        <.widget id="w-home-markets" title="markets" collapsible>
           <.live_component module={PlaceholderWidget} id="home-markets"
             message="market tickers" />
         </.widget>
 
-        <.widget title="rss">
+        <.widget id="w-home-rss" title="rss" collapsible>
           <.live_component module={PlaceholderWidget} id="home-rss"
             message="rss feeds" />
         </.widget>

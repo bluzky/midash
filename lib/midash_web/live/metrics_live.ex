@@ -19,21 +19,21 @@ defmodule MidashWeb.MetricsLive do
     ~H"""
     <.dashboard_layout nav_pages={@nav_pages} current={:metrics}>
       <.col size={:small}>
-        <.widget title="status">
+        <.widget id="w-metrics-status" title="status" collapsible>
           <.live_component module={PlaceholderWidget} id="metrics-status"
             message="service status" />
         </.widget>
       </.col>
 
       <.col size={:full}>
-        <.widget title="stats">
+        <.widget id="w-metrics-stats" title="stats" collapsible>
           <.live_component module={PlaceholderWidget} id="metrics-stats"
             message="your metrics widget goes here" />
         </.widget>
       </.col>
 
       <.col size={:small}>
-        <.widget title="alerts">
+        <.widget id="w-metrics-alerts" title="alerts" collapsible>
           <.live_component module={PlaceholderWidget} id="metrics-alerts"
             message="alerts" />
         </.widget>

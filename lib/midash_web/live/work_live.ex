@@ -67,7 +67,7 @@ defmodule MidashWeb.WorkLive do
     <.dashboard_layout nav_pages={@nav_pages} current={:work}>
       <%!-- Left column: GitHub PRs --%>
       <.col size={:full}>
-        <.widget title="innosync — pr by dev">
+        <.widget id="w-innosync-prs" title="innosync — pr by dev" on_refresh={JS.push("refresh", target: "#work-innosync-pr-by-dev")} collapsible>
           <.live_component
             module={GithubPrsWidget}
             id="work-innosync-pr-by-dev"
@@ -77,7 +77,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="innoup — pr by dev">
+        <.widget id="w-innoup-prs" title="innoup — pr by dev" on_refresh={JS.push("refresh", target: "#work-innoup-pr-by-dev")} collapsible>
           <.live_component
             module={GithubPrsWidget}
             id="work-innoup-pr-by-dev"
@@ -87,7 +87,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="innosync — my prs (no approval)">
+        <.widget id="w-innosync-my-prs" title="innosync — my prs (no approval)" on_refresh={JS.push("refresh", target: "#work-innosync-my-prs")} collapsible>
           <.live_component
             module={GithubMyPrsWidget}
             id="work-innosync-my-prs"
@@ -98,7 +98,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="innoup — my prs (no approval)">
+        <.widget id="w-innoup-my-prs" title="innoup — my prs (no approval)" on_refresh={JS.push("refresh", target: "#work-innoup-my-prs")} collapsible>
           <.live_component
             module={GithubMyPrsWidget}
             id="work-innoup-my-prs"
@@ -109,7 +109,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="innosync — pending review">
+        <.widget id="w-innosync-pending" title="innosync — pending review" on_refresh={JS.push("refresh", target: "#work-innosync-pending-review")} collapsible>
           <.live_component
             module={GithubPendingReviewWidget}
             id="work-innosync-pending-review"
@@ -120,7 +120,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="innoup — pending review">
+        <.widget id="w-innoup-pending" title="innoup — pending review" on_refresh={JS.push("refresh", target: "#work-innoup-pending-review")} collapsible>
           <.live_component
             module={GithubPendingReviewWidget}
             id="work-innoup-pending-review"
@@ -134,7 +134,7 @@ defmodule MidashWeb.WorkLive do
 
       <%!-- Right column: ClickUp tasks --%>
       <.col size={:full}>
-        <.widget title="task count">
+        <.widget id="w-clickup-count" title="task count" on_refresh={JS.push("refresh", target: "#work-clickup-task-count")} collapsible>
           <.live_component
             module={ClickupTaskCountWidget}
             id="work-clickup-task-count"
@@ -144,7 +144,7 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
-        <.widget title="my tasks">
+        <.widget id="w-clickup-tasks" title="my tasks" on_refresh={JS.push("refresh", target: "#work-clickup-task-list")} collapsible>
           <.live_component
             module={ClickupTaskListWidget}
             id="work-clickup-task-list"
