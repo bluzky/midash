@@ -14,7 +14,9 @@ defmodule Midash.Clickup do
   def statuses, do: @statuses
 
   def fetch_tasks(token, team_id, user_id) do
-    url = "https://api.clickup.com/api/v2/team/#{team_id}/task?assignees[]=#{user_id}&include_closed=false"
+    url =
+      "https://api.clickup.com/api/v2/team/#{team_id}/task?assignees[]=#{user_id}&include_closed=false"
+
     req = Finch.build(:get, url, [{"Authorization", token}])
 
     case Finch.request(req, Midash.Finch) do
@@ -24,8 +26,8 @@ defmodule Midash.Clickup do
           _ -> {:ok, []}
         end
 
-      {:ok, %{status: status}} ->
-        {:error, "clickup api error: #{status}"}
+      {:ok, %{status: status, body: body}} ->
+        {:error, "clickup api error: #{status} — #{body}"}
 
       {:error, reason} ->
         {:error, "request failed: #{inspect(reason)}"}

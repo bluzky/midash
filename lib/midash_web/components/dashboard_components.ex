@@ -48,6 +48,20 @@ defmodule MidashWeb.DashboardComponents do
     """
   end
 
+  @themes [
+    %{id: "dark", label: "Dark"},
+    %{id: "light", label: "Light"},
+    %{id: "ocean", label: "Ocean"},
+    %{id: "forest", label: "Forest"},
+    %{id: "sunset", label: "Sunset"},
+    %{id: "midnight", label: "Midnight"},
+    %{id: "nord", label: "Nord"},
+    %{id: "latte", label: "Latte"},
+    %{id: "paper", label: "Paper"},
+    %{id: "rose", label: "Rose"},
+    %{id: "mint", label: "Mint"}
+  ]
+
   @doc """
   Horizontal navigation bar.
   - `current` - atom of active page
@@ -57,26 +71,73 @@ defmodule MidashWeb.DashboardComponents do
   attr :pages, :list, required: true
 
   def dashboard_nav(assigns) do
+    assigns = assign(assigns, :themes, @themes)
+
     ~H"""
-    <nav class="flex items-center border-b border-border bg-background px-4">
-      <span class="text-muted-foreground text-xs mr-4 select-none">midash</span>
+    <nav class="flex items-center gap-1 border-b border-border bg-background px-4 py-2">
+      <span class="text-muted-foreground text-xs mr-3 select-none tracking-wide">midash</span>
       <%= for page <- @pages do %>
         <.link
           navigate={page.path}
           class={[
-            "px-3 py-3 text-sm border-b-2 -mb-px transition-colors whitespace-nowrap",
+            "px-3 py-1.5 text-sm rounded-md transition-colors",
             if(page.id == @current,
-              do: "border-foreground text-foreground",
-              else: "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+              do: "bg-secondary text-foreground",
+              else: "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             )
           ]}
         >
           {page.label}
         </.link>
       <% end %>
+      <%!-- Theme switcher dropdown --%>
+      <div class="ml-auto relative" id="theme-switcher" phx-hook="ThemeSwitcher">
+        <button
+          id="theme-menu-btn"
+          class="flex items-center gap-1.5 rounded-sm px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          title="switch theme"
+          onclick="document.getElementById('theme-menu').classList.toggle('hidden')"
+        >
+          <Lucideicons.palette class="w-4 h-4" aria-hidden="true" />
+          <span id="theme-label">theme</span>
+          <Lucideicons.chevron_down class="w-3 h-3" aria-hidden="true" />
+        </button>
+        <div
+          id="theme-menu"
+          class="hidden absolute right-0 top-full mt-1 z-50 min-w-[8rem] rounded-md border border-border bg-card shadow-lg py-1"
+        >
+          <%= for theme <- @themes do %>
+            <button
+              class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              phx-click={Phoenix.LiveView.JS.dispatch("phx:set-theme", detail: %{theme: theme.id})}
+              onclick={"setTheme('#{theme.id}'); document.getElementById('theme-menu').classList.add('hidden')"}
+            >
+              <span class={[
+                "w-2.5 h-2.5 rounded-full border border-border flex-shrink-0",
+                theme_swatch_class(theme.id)
+              ]}>
+              </span>
+              {theme.label}
+            </button>
+          <% end %>
+        </div>
+      </div>
     </nav>
     """
   end
+
+  defp theme_swatch_class("dark"), do: "bg-[#141414]"
+  defp theme_swatch_class("light"), do: "bg-white"
+  defp theme_swatch_class("ocean"), do: "bg-[#0d2233]"
+  defp theme_swatch_class("forest"), do: "bg-[#0a1a0f]"
+  defp theme_swatch_class("sunset"), do: "bg-[#1f100a]"
+  defp theme_swatch_class("midnight"), do: "bg-[#0e0b1f]"
+  defp theme_swatch_class("nord"), do: "bg-[#1e2433]"
+  defp theme_swatch_class("latte"), do: "bg-[#f5ede0]"
+  defp theme_swatch_class("paper"), do: "bg-[#f3f4f8]"
+  defp theme_swatch_class("rose"), do: "bg-[#fdf0f3]"
+  defp theme_swatch_class("mint"), do: "bg-[#eef7f3]"
+  defp theme_swatch_class(_), do: "bg-secondary"
 
   @doc """
   A vertical column. Widgets are stacked inside.
@@ -111,54 +172,32 @@ defmodule MidashWeb.DashboardComponents do
 
   def widget(assigns) do
     ~H"""
-    <div class={["mb-4 border border-border bg-card last:mb-0", @class]}>
+    <div class={["mb-4 rounded-lg border border-border bg-card shadow-sm last:mb-0", @class]}>
       <div
         :if={@title}
-        class="px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-widest flex items-center justify-between"
+        class="px-4 py-2.5 border-b border-border text-xs text-muted-foreground uppercase tracking-widest flex items-center justify-between"
       >
-        <span>— {@title}</span>
+        <span>{@title}</span>
         <span :if={@on_refresh || @collapsible} class="flex items-center gap-1">
           <button
             :if={@on_refresh}
             phx-click={@on_refresh}
-            class="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+            class="rounded-sm p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             title="refresh"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              class="w-3 h-3"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M13.836 2.477a.75.75 0 0 1 .75.75v3.182a.75.75 0 0 1-.75.75h-3.182a.75.75 0 0 1 0-1.5h1.37l-.84-.841a4.5 4.5 0 0 0-7.08.681.75.75 0 0 1-1.3-.75 6 6 0 0 1 9.44-.908l.84.84V3.227a.75.75 0 0 1 .75-.75Zm-.911 7.5A.75.75 0 0 1 13.199 11a6 6 0 0 1-9.44.908l-.84-.84v1.769a.75.75 0 0 1-1.5 0V9.637a.75.75 0 0 1 .75-.75h3.182a.75.75 0 0 1 0 1.5H3.98l.841.841a4.5 4.5 0 0 0 7.08-.681.75.75 0 0 1 1.025-.274Z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Lucideicons.rotate_cw class="w-3.5 h-3.5" aria-hidden="true" />
           </button>
           <button
             :if={@collapsible}
             phx-click={Phoenix.LiveView.JS.toggle(to: "##{@id}-content")}
-            class="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+            class="rounded-sm p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             title="collapse"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              class="w-3 h-3"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Lucideicons.chevron_down class="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </span>
       </div>
-      <div id={if @id, do: "#{@id}-content"} class="p-3">
+      <div id={if @id, do: "#{@id}-content"} class="p-4">
         {render_slot(@inner_block)}
       </div>
     </div>

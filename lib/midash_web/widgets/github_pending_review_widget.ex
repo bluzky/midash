@@ -45,11 +45,11 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
         <div :if={@prs == []} class="text-muted-foreground text-xs">no prs need review</div>
         <div :if={@prs != []} class="space-y-3">
           <%= for pr <- @prs do %>
-            <div class="border-l border-border pl-3">
+            <div class="border-l-2 border-border pl-3">
               <a
                 href={pr["html_url"]}
                 target="_blank"
-                class="text-xs text-info hover:text-info/80 block mb-1"
+                class="text-xs text-info hover:underline block mb-1"
               >
                 <span class="text-muted-foreground">#<%= pr["number"] %></span>
                 {pr["title"]}

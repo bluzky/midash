@@ -47,7 +47,7 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
             <a
               href={"https://github.com/#{@repo}/pulls?q=is:pr+is:open+author:#{author}+base:#{@base}"}
               target="_blank"
-              class="flex flex-col items-center border border-border px-3 py-2 hover:border-muted-foreground transition-colors min-w-16"
+              class="flex flex-col items-center rounded-md border border-border px-3 py-2 hover:bg-secondary transition-colors min-w-16"
             >
               <span class="text-xs text-muted-foreground">{author}</span>
               <span class="text-xl text-success tabular-nums">{count}</span>

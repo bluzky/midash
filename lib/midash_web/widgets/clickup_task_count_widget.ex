@@ -50,7 +50,7 @@ defmodule MidashWeb.Widgets.ClickupTaskCountWidget do
         <div class="flex gap-2 flex-wrap">
           <%= for s <- @statuses do %>
             <% count = Clickup.count_by_status(@tasks, s.key) %>
-            <div class="border border-border px-3 py-2 text-center min-w-20">
+            <div class="rounded-md border border-border px-3 py-2 text-center min-w-20">
               <div class="text-xs text-muted-foreground">{s.label}</div>
               <div class="text-2xl tabular-nums" style={"color: #{s.color}"}>{count}</div>
             </div>

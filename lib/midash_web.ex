@@ -90,6 +90,7 @@ defmodule MidashWeb do
       # Core UI components
       import MidashWeb.CoreComponents
       import MidashWeb.DashboardComponents
+      import Lucideicons, except: [link: 1, import: 1, quote: 1]
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
