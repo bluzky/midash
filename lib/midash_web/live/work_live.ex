@@ -6,7 +6,8 @@ defmodule MidashWeb.WorkLive do
     GithubPendingReviewWidget,
     GithubMyPrsWidget,
     ClickupTaskCountWidget,
-    ClickupTaskListWidget
+    ClickupTaskListWidget,
+    QuickNoteWidget
   }
 
   @nav_pages [
@@ -59,7 +60,7 @@ defmodule MidashWeb.WorkLive do
     ~H"""
     <.dashboard_layout nav_pages={@nav_pages} current={:work}>
       <%!-- Left column: GitHub PRs --%>
-      <.col size={:full}>
+      <.col span={4}>
         <.widget
           id="w-innosync-prs"
           title="innosync — pr by dev"
@@ -156,7 +157,7 @@ defmodule MidashWeb.WorkLive do
       </.col>
 
       <%!-- Right column: ClickUp tasks --%>
-      <.col size={:full}>
+      <.col span={4}>
         <.widget
           id="w-clickup-count"
           title="task count"
@@ -185,6 +186,13 @@ defmodule MidashWeb.WorkLive do
             team_id={@clickup_team_id}
             user_id={@clickup_user_id}
           />
+        </.widget>
+      </.col>
+
+      <%!-- Rightmost column: notes --%>
+      <.col span={4}>
+        <.widget id="w-quick-note" title="quick note">
+          <.live_component module={QuickNoteWidget} id="work-quick-note" />
         </.widget>
       </.col>
     </.dashboard_layout>

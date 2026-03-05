@@ -50,7 +50,9 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
         <%= for s <- @statuses do %>
           <% status_tasks = Clickup.filter_by_status(@tasks, s.key) %>
           <div :if={status_tasks != []} class="mb-4">
-            <div class="text-xs uppercase tracking-widest mb-2" style={"color: #{s.color}"}>{s.label}</div>
+            <div class="text-xs uppercase tracking-widest mb-2" style={"color: #{s.color}"}>
+              {s.label}
+            </div>
             <div class="space-y-1">
               <%= for task <- status_tasks do %>
                 <div class="flex items-start gap-2">
@@ -58,7 +60,7 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
                   <a
                     href={task["url"]}
                     target="_blank"
-                    class="text-xs text-foreground hover:text-foreground/90 leading-snug"
+                    class="text-xs text-foreground hover:text-foreground/90 hover:underline leading-snug"
                   >
                     {task["name"]}
                   </a>

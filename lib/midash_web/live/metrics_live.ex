@@ -18,24 +18,25 @@ defmodule MidashWeb.MetricsLive do
   def render(assigns) do
     ~H"""
     <.dashboard_layout nav_pages={@nav_pages} current={:metrics}>
-      <.col size={:small}>
+      <.col span={3}>
         <.widget id="w-metrics-status" title="status" collapsible>
-          <.live_component module={PlaceholderWidget} id="metrics-status"
-            message="service status" />
+          <.live_component module={PlaceholderWidget} id="metrics-status" message="service status" />
         </.widget>
       </.col>
 
-      <.col size={:full}>
+      <.col span={6}>
         <.widget id="w-metrics-stats" title="stats" collapsible>
-          <.live_component module={PlaceholderWidget} id="metrics-stats"
-            message="your metrics widget goes here" />
+          <.live_component
+            module={PlaceholderWidget}
+            id="metrics-stats"
+            message="your metrics widget goes here"
+          />
         </.widget>
       </.col>
 
-      <.col size={:small}>
+      <.col span={3}>
         <.widget id="w-metrics-alerts" title="alerts" collapsible>
-          <.live_component module={PlaceholderWidget} id="metrics-alerts"
-            message="alerts" />
+          <.live_component module={PlaceholderWidget} id="metrics-alerts" message="alerts" />
         </.widget>
       </.col>
     </.dashboard_layout>

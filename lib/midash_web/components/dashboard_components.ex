@@ -5,24 +5,25 @@ defmodule MidashWeb.DashboardComponents do
   @moduledoc """
   Components for building glance-style dashboard pages.
 
-  Layout model: columns stacked side-by-side, widgets stacked vertically inside each column.
+  Layout model: a 12-column CSS grid. Each column declares how many grid columns it spans (3, 4, 6, 8, or 12).
+  Widgets stack vertically inside each column.
 
   ## Page layout example
 
       <.dashboard_layout nav_pages={@nav_pages} current={:home}>
-        <.col size={:small}>
+        <.col span={3}>
           <.widget title="Clock">
             <.live_component module={ClockWidget} id="clock" />
           </.widget>
         </.col>
 
-        <.col size={:full}>
+        <.col span={6}>
           <.widget title="News">
             <.live_component module={HackerNewsWidget} id="hn" />
           </.widget>
         </.col>
 
-        <.col size={:small}>
+        <.col span={3}>
           <.widget title="Markets">
             <.live_component module={MarketsWidget} id="markets" />
           </.widget>
@@ -41,7 +42,7 @@ defmodule MidashWeb.DashboardComponents do
     ~H"""
     <div class="min-h-screen bg-background text-foreground font-mono">
       <.dashboard_nav current={@current} pages={@nav_pages} />
-      <div class="flex gap-4 p-4 items-start">
+      <div class="grid grid-cols-12 gap-4 p-4 items-start">
         {render_slot(@inner_block)}
       </div>
     </div>
@@ -140,16 +141,16 @@ defmodule MidashWeb.DashboardComponents do
   defp theme_swatch_class(_), do: "bg-secondary"
 
   @doc """
-  A vertical column. Widgets are stacked inside.
+  A vertical column that spans a number of grid columns (out of 12).
 
-  - `size` - `:small` (narrow sidebar) or `:full` (takes remaining space)
+  - `span` - number of columns to span: `3`, `4`, `6`, `8`, `9`, or `12` (default `6`)
   """
-  attr :size, :atom, default: :full
+  attr :span, :integer, default: 6
   slot :inner_block, required: true
 
   def col(assigns) do
     ~H"""
-    <div class={col_class(@size)}>
+    <div class={col_class(@span)}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -206,7 +207,12 @@ defmodule MidashWeb.DashboardComponents do
 
   # --- Helpers ---
 
-  defp col_class(:small), do: "w-64 shrink-0"
-  defp col_class(:full), do: "flex-1 min-w-0"
-  defp col_class(_), do: "flex-1 min-w-0"
+  # Explicit class strings so Tailwind's scanner keeps them in the bundle.
+  defp col_class(3), do: "col-span-3 min-w-0"
+  defp col_class(4), do: "col-span-4 min-w-0"
+  defp col_class(6), do: "col-span-6 min-w-0"
+  defp col_class(8), do: "col-span-8 min-w-0"
+  defp col_class(9), do: "col-span-9 min-w-0"
+  defp col_class(12), do: "col-span-12 min-w-0"
+  defp col_class(_), do: "col-span-6 min-w-0"
 end

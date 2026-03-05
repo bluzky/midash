@@ -7,9 +7,13 @@ defmodule Midash.Application do
 
   @impl true
   def start(_type, _args) do
+    db_path = Application.app_dir(:midash, "priv/cubdb")
+    File.mkdir_p!(db_path)
+
     children = [
       MidashWeb.Telemetry,
       Midash.Repo,
+      {CubDB, data_dir: db_path, name: Midash.Store.DB},
       {DNSCluster, query: Application.get_env(:midash, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Midash.PubSub},
       # Start the Finch HTTP client for sending emails
