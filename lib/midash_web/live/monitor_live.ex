@@ -3,17 +3,11 @@ defmodule MidashWeb.MonitorLive do
 
   alias MidashWeb.Widgets.SentryIssuesWidget
 
-  @nav_pages [
-    %{id: :home, label: "home", path: "/"},
-    %{id: :work, label: "work", path: "/work"},
-    %{id: :monitor, label: "monitor", path: "/monitor"}
-  ]
-
   @impl true
   def mount(_params, _session, socket) do
     projects = load_projects()
 
-    {:ok, assign(socket, nav_pages: @nav_pages, projects: projects),
+    {:ok, assign(socket, projects: projects),
      layout: {MidashWeb.Layouts, :dashboard}}
   end
 
@@ -54,7 +48,7 @@ defmodule MidashWeb.MonitorLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.dashboard_layout nav_pages={@nav_pages} current={:monitor}>
+    <.dashboard_layout current={MidashWeb.Nav.current_from_module(__MODULE__)}>
       <%= for project <- @projects do %>
         <.col span={6}>
           <div class="space-y-4">

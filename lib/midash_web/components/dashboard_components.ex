@@ -33,12 +33,21 @@ defmodule MidashWeb.DashboardComponents do
 
   @doc """
   Full page wrapper: nav + columns layout.
+
+  Automatically uses shared nav pages. Optionally accepts `current` to set active page,
+  or pass the LiveView module to auto-detect.
+
+  Examples:
+      <.dashboard_layout>...</.dashboard_layout>
+      <.dashboard_layout current={:home}>...</.dashboard_layout>
   """
-  attr :nav_pages, :list, required: true
-  attr :current, :atom, required: true
+  attr :current, :atom, default: nil
   slot :inner_block, required: true
 
   def dashboard_layout(assigns) do
+    nav_pages = MidashWeb.Nav.pages()
+    assigns = assign(assigns, nav_pages: nav_pages)
+
     ~H"""
     <div class="min-h-screen bg-background text-foreground font-mono">
       <.dashboard_nav current={@current} pages={@nav_pages} />
@@ -76,7 +85,7 @@ defmodule MidashWeb.DashboardComponents do
 
     ~H"""
     <nav class="flex items-center gap-1 border-b border-border bg-background px-4 py-2">
-      <span class="text-muted-foreground text-xs mr-3 select-none tracking-wide">midash</span>
+      <img src="/images/logo.svg" alt="midash" class="h-5 mr-2" />
       <%= for page <- @pages do %>
         <.link
           navigate={page.path}
@@ -184,7 +193,13 @@ defmodule MidashWeb.DashboardComponents do
             :if={@on_refresh}
             id={"#{@id}-refresh-btn"}
             phx-hook="RefreshButton"
-            phx-click={%Phoenix.LiveView.JS{ops: Phoenix.LiveView.JS.add_class("animate-spin", to: "##{@id}-refresh-icon").ops ++ @on_refresh.ops}}
+            phx-click={
+              %Phoenix.LiveView.JS{
+                ops:
+                  Phoenix.LiveView.JS.add_class("animate-spin", to: "##{@id}-refresh-icon").ops ++
+                    @on_refresh.ops
+              }
+            }
             class="rounded-sm p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             title="refresh"
           >

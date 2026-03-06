@@ -10,17 +10,10 @@ defmodule MidashWeb.WorkLive do
     QuickNoteWidget
   }
 
-  @nav_pages [
-    %{id: :home, label: "home", path: "/"},
-    %{id: :work, label: "work", path: "/work"},
-    %{id: :monitor, label: "monitor", path: "/monitor"}
-  ]
-
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
-       nav_pages: @nav_pages,
        github_token: System.get_env("GITHUB_TOKEN", ""),
        clickup_token: System.get_env("CLICKUP_TOKEN", ""),
        github_username: System.get_env("GITHUB_USERNAME", "bluzky"),
@@ -64,7 +57,7 @@ defmodule MidashWeb.WorkLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.dashboard_layout nav_pages={@nav_pages} current={:work}>
+    <.dashboard_layout current={MidashWeb.Nav.current_from_module(__MODULE__)}>
       <%!-- Left column: GitHub PRs --%>
       <.col span={4}>
         <.widget

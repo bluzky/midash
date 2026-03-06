@@ -3,22 +3,15 @@ defmodule MidashWeb.MetricsLive do
 
   alias MidashWeb.Widgets.PlaceholderWidget
 
-  @nav_pages [
-    %{id: :home, label: "home", path: "/"},
-    %{id: :work, label: "work", path: "/work"},
-    %{id: :monitor, label: "monitor", path: "/monitor"},
-    %{id: :metrics, label: "metrics", path: "/metrics"}
-  ]
-
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, nav_pages: @nav_pages), layout: {MidashWeb.Layouts, :dashboard}}
+    {:ok, socket, layout: {MidashWeb.Layouts, :dashboard}}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.dashboard_layout nav_pages={@nav_pages} current={:metrics}>
+    <.dashboard_layout current={MidashWeb.Nav.current_from_module(__MODULE__)}>
       <.col span={3}>
         <.widget id="w-metrics-status" title="status" collapsible>
           <.live_component module={PlaceholderWidget} id="metrics-status" message="service status" />

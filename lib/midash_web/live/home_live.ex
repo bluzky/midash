@@ -9,15 +9,9 @@ defmodule MidashWeb.HomeLive do
     %{label: "Tokyo", tz: "Asia/Tokyo"}
   ]
 
-  @nav_pages [
-    %{id: :home, label: "home", path: "/"},
-    %{id: :work, label: "work", path: "/work"},
-    %{id: :monitor, label: "monitor", path: "/monitor"}
-  ]
-
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, nav_pages: @nav_pages, world_clocks: @world_clocks),
+    {:ok, assign(socket, world_clocks: @world_clocks),
      layout: {MidashWeb.Layouts, :dashboard}}
   end
 
@@ -30,7 +24,7 @@ defmodule MidashWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.dashboard_layout nav_pages={@nav_pages} current={:home}>
+    <.dashboard_layout current={MidashWeb.Nav.current_from_module(__MODULE__)}>
       <.col span={3}>
         <.widget id="w-home-world-clock" title="world clock" collapsible>
           <.live_component module={WorldClockWidget} id="home-world-clock" clocks={@world_clocks} />

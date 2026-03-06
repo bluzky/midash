@@ -11,12 +11,17 @@ defmodule Midash.Sentry do
   @api_path "/api/0"
 
   @doc """
-  Fetches issues from a Sentry project created within the last 24 hours.
+  Fetches issues from a Sentry project.
 
   Args:
   - `org_slug` - Organization slug (e.g., "gdec")
   - `project_slug` - Project slug (e.g., "oms")
-  - `environment` - Optional environment filter (e.g., "gdec-prod", "gdec-dev"), defaults to nil
+  - `filters` - Map of Sentry query filters (optional)
+    - `"environment"` - Environment filter (e.g., "gdec-prod")
+    - `"query"` - Sentry query string (e.g., "lastSeen:>=2026-03-05")
+  - `opts` - Keyword list of options
+    - `:limit` - Number of issues to return (default: 10)
+    - `:sort` - Sort order (default: "freq")
 
   Reads SENTRY_TOKEN from environment variables.
 
@@ -30,30 +35,36 @@ defmodule Midash.Sentry do
   - `"lastSeen"` - when issue was last seen (ISO 8601)
   - `"shortID"` - short identifier like "OMS-1"
   - `"platform"` - platform (python, javascript, etc.)
-  """
-  def fetch_recent_issues(org_slug, project_slug, environment \\ nil, sort \\ "freq") do
-    token = System.get_env("SENTRY_TOKEN")
 
-    Logger.info("[Sentry] Fetching issues - Org: #{org_slug}, Project: #{project_slug}, Env: #{environment || "all"}, Sort: #{sort}")
-    Logger.debug("[Sentry] Token (masked): #{mask_token(token)}")
+  ## Examples
+
+      # Fetch issues from last 24 hours in a specific environment
+      fetch_issues("gdec", "oms", %{"environment" => "gdec-prod", "query" => "lastSeen:>=2026-03-05"})
+
+      # Fetch all issues with custom sort
+      fetch_issues("gdec", "oms", %{}, sort: "date")
+  """
+  def fetch_issues(org_slug, project_slug, filters \\ %{}, opts \\ []) do
+    token = System.get_env("SENTRY_TOKEN")
+    limit = Keyword.get(opts, :limit, 10)
+    sort = Keyword.get(opts, :sort, "freq")
 
     if is_nil(token) do
       Logger.error("[Sentry] SENTRY_TOKEN environment variable is not set!")
       {:error, "SENTRY_TOKEN not configured"}
     else
-      do_fetch_issues(token, org_slug, project_slug, environment, sort)
+      do_fetch_issues(token, org_slug, project_slug, filters, limit, sort)
     end
   end
 
-  defp do_fetch_issues(token, org_slug, project_slug, environment, sort) do
-    # Get issues from last 24 hours
+  defp do_fetch_issues(token, org_slug, project_slug, filters, limit, sort) do
     url = "#{@sentry_url}#{@api_path}/projects/#{org_slug}/#{project_slug}/issues/"
 
-    # Build query with optional environment filter
-    query_parts = ["age:-24h", "limit=10", "sort=#{sort}"]
-    query_parts = if environment, do: ["environment:#{environment}" | query_parts], else: query_parts
+    # Build query parameters from filters
+    query_parts = build_query_params(filters, limit, sort)
 
-    query = "?" <> Enum.join(query_parts, "&")
+    # Use URI.encode_query to properly encode the query parameters
+    query = "?" <> URI.encode_query(query_parts)
     full_url = url <> query
 
     headers = [
@@ -71,15 +82,12 @@ defmodule Midash.Sentry do
 
         case Jason.decode(resp_body) do
           {:ok, issues} when is_list(issues) ->
-            Logger.info("[Sentry] Decoded #{length(issues)} issues")
             {:ok, Enum.map(issues, &normalize_issue/1)}
 
           {:ok, _} ->
-            Logger.error("[Sentry] Response is not a list: #{inspect(resp_body)}")
             {:error, "unexpected sentry response format"}
 
           {:error, reason} ->
-            Logger.error("[Sentry] JSON decode error: #{inspect(reason)}")
             {:error, "json decode error: #{inspect(reason)}"}
         end
 
@@ -101,12 +109,28 @@ defmodule Midash.Sentry do
     end
   end
 
-  defp mask_token(nil), do: "NOT SET"
-  defp mask_token(token) do
-    case String.length(token) do
-      len when len > 10 -> String.slice(token, 0, 5) <> "..." <> String.slice(token, -4..-1)
-      _ -> "***"
-    end
+  defp build_query_params(filters, limit, sort) do
+    # Start with limit and sort (always included)
+    query_parts = [
+      {"limit", to_string(limit)},
+      {"sort", sort}
+    ]
+
+    # Add query filter if present
+    query_parts =
+      case Map.get(filters, "query") do
+        nil -> query_parts
+        query_str -> [{"query", query_str} | query_parts]
+      end
+
+    # Add environment filter if present
+    query_parts =
+      case Map.get(filters, "environment") do
+        nil -> query_parts
+        env -> [{"environment", env} | query_parts]
+      end
+
+    query_parts
   end
 
   defp normalize_issue(issue) do

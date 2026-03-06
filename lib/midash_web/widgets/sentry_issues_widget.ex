@@ -152,12 +152,27 @@ defmodule MidashWeb.Widgets.SentryIssuesWidget do
     environment = Map.get(socket.assigns, :environment, nil)
     sort = socket.assigns.sort
 
-    case Sentry.fetch_recent_issues(org_slug, project_slug, environment, sort) do
+    # Build filters for last 24 hours
+    filters = %{
+      "query" => "lastSeen:>=#{yesterday_iso()}"
+    }
+
+    filters =
+      if environment, do: Map.put(filters, "environment", environment), else: filters
+
+    case Sentry.fetch_issues(org_slug, project_slug, filters, sort: sort) do
       {:ok, issues} ->
         assign(socket, issues: issues, loading: false, error: nil)
 
       {:error, reason} ->
         assign(socket, loading: false, error: reason)
     end
+  end
+
+  defp yesterday_iso do
+    DateTime.utc_now()
+    |> DateTime.add(-86400, :second)
+    |> DateTime.to_iso8601()
+    |> String.slice(0..9)
   end
 end
