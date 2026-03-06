@@ -12,7 +12,7 @@ defmodule MidashWeb.HomeLive do
   @nav_pages [
     %{id: :home, label: "home", path: "/"},
     %{id: :work, label: "work", path: "/work"},
-    %{id: :metrics, label: "metrics", path: "/metrics"}
+    %{id: :monitor, label: "monitor", path: "/monitor"}
   ]
 
   @impl true

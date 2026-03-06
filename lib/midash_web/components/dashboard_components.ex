@@ -182,11 +182,13 @@ defmodule MidashWeb.DashboardComponents do
         <span :if={@on_refresh || @collapsible} class="flex items-center gap-1">
           <button
             :if={@on_refresh}
-            phx-click={@on_refresh}
+            id={"#{@id}-refresh-btn"}
+            phx-hook="RefreshButton"
+            phx-click={%Phoenix.LiveView.JS{ops: Phoenix.LiveView.JS.add_class("animate-spin", to: "##{@id}-refresh-icon").ops ++ @on_refresh.ops}}
             class="rounded-sm p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             title="refresh"
           >
-            <Lucideicons.rotate_cw class="w-3.5 h-3.5" aria-hidden="true" />
+            <Lucideicons.rotate_cw id={"#{@id}-refresh-icon"} class="w-3.5 h-3.5" aria-hidden="true" />
           </button>
           <button
             :if={@collapsible}

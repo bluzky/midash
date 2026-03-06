@@ -19,7 +19,7 @@ defmodule MidashWeb.Router do
 
     live "/", HomeLive
     live "/work", WorkLive
-    live "/metrics", MetricsLive
+    live "/monitor", MonitorLive
   end
 
   # Other scopes may use custom stacks.

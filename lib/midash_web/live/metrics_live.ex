@@ -6,6 +6,7 @@ defmodule MidashWeb.MetricsLive do
   @nav_pages [
     %{id: :home, label: "home", path: "/"},
     %{id: :work, label: "work", path: "/work"},
+    %{id: :monitor, label: "monitor", path: "/monitor"},
     %{id: :metrics, label: "metrics", path: "/metrics"}
   ]
 

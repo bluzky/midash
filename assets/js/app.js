@@ -82,7 +82,14 @@ const ThemeSwitcher = {
   }
 }
 
-let hooks = { ThemeSwitcher, FocusOnMount: { mounted() { this.el.focus() } } }
+const RefreshButton = {
+  updated() {
+    const icon = this.el.querySelector("svg")
+    if (icon) icon.classList.remove("animate-spin")
+  }
+}
+
+let hooks = { ThemeSwitcher, RefreshButton, FocusOnMount: { mounted() { this.el.focus() } } }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {

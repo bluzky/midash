@@ -13,7 +13,7 @@ defmodule MidashWeb.WorkLive do
   @nav_pages [
     %{id: :home, label: "home", path: "/"},
     %{id: :work, label: "work", path: "/work"},
-    %{id: :metrics, label: "metrics", path: "/metrics"}
+    %{id: :monitor, label: "monitor", path: "/monitor"}
   ]
 
   @impl true
@@ -27,6 +27,12 @@ defmodule MidashWeb.WorkLive do
        clickup_team_id: System.get_env("CLICKUP_TEAM_ID", "9018975210"),
        clickup_user_id: System.get_env("CLICKUP_USER_ID", "95668281")
      ), layout: {MidashWeb.Layouts, :dashboard}}
+  end
+
+  @impl true
+  def handle_event("refresh", %{"id" => id, "module" => module}, socket) do
+    send_update(String.to_existing_atom(module), id: id, action: :fetch)
+    {:noreply, socket}
   end
 
   @impl true
@@ -64,7 +70,7 @@ defmodule MidashWeb.WorkLive do
         <.widget
           id="w-innosync-prs"
           title="innosync — pr by dev"
-          on_refresh={JS.push("refresh", target: "#work-innosync-pr-by-dev")}
+          on_refresh={JS.push("refresh", value: %{id: "work-innosync-pr-by-dev", module: "Elixir.MidashWeb.Widgets.GithubPrsWidget"})}
           collapsible
         >
           <.live_component
@@ -79,7 +85,7 @@ defmodule MidashWeb.WorkLive do
         <.widget
           id="w-innoup-prs"
           title="innoup — pr by dev"
-          on_refresh={JS.push("refresh", target: "#work-innoup-pr-by-dev")}
+          on_refresh={JS.push("refresh", value: %{id: "work-innoup-pr-by-dev", module: "Elixir.MidashWeb.Widgets.GithubPrsWidget"})}
           collapsible
         >
           <.live_component
@@ -93,8 +99,8 @@ defmodule MidashWeb.WorkLive do
 
         <.widget
           id="w-innosync-my-prs"
-          title="innosync — my prs (no approval)"
-          on_refresh={JS.push("refresh", target: "#work-innosync-my-prs")}
+          title="innosync — my prs"
+          on_refresh={JS.push("refresh", value: %{id: "work-innosync-my-prs", module: "Elixir.MidashWeb.Widgets.GithubMyPrsWidget"})}
           collapsible
         >
           <.live_component
@@ -109,8 +115,8 @@ defmodule MidashWeb.WorkLive do
 
         <.widget
           id="w-innoup-my-prs"
-          title="innoup — my prs (no approval)"
-          on_refresh={JS.push("refresh", target: "#work-innoup-my-prs")}
+          title="innoup — my prs"
+          on_refresh={JS.push("refresh", value: %{id: "work-innoup-my-prs", module: "Elixir.MidashWeb.Widgets.GithubMyPrsWidget"})}
           collapsible
         >
           <.live_component
@@ -123,10 +129,44 @@ defmodule MidashWeb.WorkLive do
           />
         </.widget>
 
+      </.col>
+
+      <%!-- Center column: ClickUp tasks + pending reviews --%>
+      <.col span={4}>
+        <.widget
+          id="w-clickup-count"
+          title="task count"
+          on_refresh={JS.push("refresh", value: %{id: "work-clickup-task-count", module: "Elixir.MidashWeb.Widgets.ClickupTaskCountWidget"})}
+          collapsible
+        >
+          <.live_component
+            module={ClickupTaskCountWidget}
+            id="work-clickup-task-count"
+            token={@clickup_token}
+            team_id={@clickup_team_id}
+            user_id={@clickup_user_id}
+          />
+        </.widget>
+
+        <.widget
+          id="w-clickup-tasks"
+          title="my tasks"
+          on_refresh={JS.push("refresh", value: %{id: "work-clickup-task-list", module: "Elixir.MidashWeb.Widgets.ClickupTaskListWidget"})}
+          collapsible
+        >
+          <.live_component
+            module={ClickupTaskListWidget}
+            id="work-clickup-task-list"
+            token={@clickup_token}
+            team_id={@clickup_team_id}
+            user_id={@clickup_user_id}
+          />
+        </.widget>
+
         <.widget
           id="w-innosync-pending"
           title="innosync — pending review"
-          on_refresh={JS.push("refresh", target: "#work-innosync-pending-review")}
+          on_refresh={JS.push("refresh", value: %{id: "work-innosync-pending-review", module: "Elixir.MidashWeb.Widgets.GithubPendingReviewWidget"})}
           collapsible
         >
           <.live_component
@@ -142,7 +182,7 @@ defmodule MidashWeb.WorkLive do
         <.widget
           id="w-innoup-pending"
           title="innoup — pending review"
-          on_refresh={JS.push("refresh", target: "#work-innoup-pending-review")}
+          on_refresh={JS.push("refresh", value: %{id: "work-innoup-pending-review", module: "Elixir.MidashWeb.Widgets.GithubPendingReviewWidget"})}
           collapsible
         >
           <.live_component
@@ -152,39 +192,6 @@ defmodule MidashWeb.WorkLive do
             token={@github_token}
             me={@github_username}
             base="staging"
-          />
-        </.widget>
-      </.col>
-
-      <%!-- Right column: ClickUp tasks --%>
-      <.col span={4}>
-        <.widget
-          id="w-clickup-count"
-          title="task count"
-          on_refresh={JS.push("refresh", target: "#work-clickup-task-count")}
-          collapsible
-        >
-          <.live_component
-            module={ClickupTaskCountWidget}
-            id="work-clickup-task-count"
-            token={@clickup_token}
-            team_id={@clickup_team_id}
-            user_id={@clickup_user_id}
-          />
-        </.widget>
-
-        <.widget
-          id="w-clickup-tasks"
-          title="my tasks"
-          on_refresh={JS.push("refresh", target: "#work-clickup-task-list")}
-          collapsible
-        >
-          <.live_component
-            module={ClickupTaskListWidget}
-            id="work-clickup-task-list"
-            token={@clickup_token}
-            team_id={@clickup_team_id}
-            user_id={@clickup_user_id}
           />
         </.widget>
       </.col>
