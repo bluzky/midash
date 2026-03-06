@@ -1,6 +1,6 @@
 defmodule MidashWeb.Widgets.GithubMyPrsWidget do
   @moduledoc """
-  Shows my open PRs targeting a base branch that have no approvals yet.
+  Shows all my open PRs targeting a base branch.
 
   Required assigns:
   - `repo`  - "owner/repo" string
@@ -42,7 +42,7 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
       <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
       <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-muted-foreground text-xs">all prs approved</div>
+        <div :if={@prs == []} class="text-muted-foreground text-xs">no open prs</div>
         <div :if={@prs != []} class="space-y-3">
           <%= for pr <- @prs do %>
             <div class="border-l-2 border-border pl-3">
@@ -77,13 +77,11 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
       {:ok, prs} ->
         my_prs =
           prs
-          |> Enum.filter(fn pr -> pr["author"] == me end)
+          |> Enum.filter(fn pr -> pr["author"] == me and pr["base_ref"] == base end)
           |> Enum.map(fn pr ->
             approval_count = Enum.count(pr["reviews"], &(&1["state"] == "APPROVED"))
             Map.put(pr, :approvals, approval_count)
           end)
-          |> Enum.filter(fn pr -> pr[:approvals] == 0 end)
-
         assign(socket, prs: my_prs, loading: false, error: nil)
 
       {:error, reason} ->

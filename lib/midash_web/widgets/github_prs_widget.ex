@@ -66,7 +66,9 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
     [owner, repo_name] = String.split(repo, "/")
 
     case Midash.GitHub.fetch_open_prs(token, owner, repo_name, base) do
-      {:ok, prs} -> assign(socket, prs: prs, loading: false, error: nil)
+      {:ok, prs} ->
+        filtered = Enum.filter(prs, fn pr -> pr["base_ref"] == base end)
+        assign(socket, prs: filtered, loading: false, error: nil)
       {:error, reason} -> assign(socket, loading: false, error: reason)
     end
   end

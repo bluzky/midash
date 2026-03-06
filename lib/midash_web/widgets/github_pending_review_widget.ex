@@ -82,9 +82,13 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
             reviews = pr["reviews"]
             approved_by = reviews |> Enum.filter(&(&1["state"] == "APPROVED")) |> Enum.map(& &1["author"])
             i_approved = me in approved_by
-            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by)})
+            i_requested = me in pr["review_requestees"]
+            targets_base = pr["base_ref"] == base
+            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by), i_requested: i_requested, targets_base: targets_base})
           end)
-          |> Enum.reject(& &1.i_approved)
+          |> Enum.reject(fn pr -> pr["author"] == me end)
+          |> Enum.filter(fn pr -> pr.targets_base or pr.i_requested end)
+          |> Enum.reject(fn pr -> pr.i_approved end)
 
         assign(socket, prs: pending, loading: false, error: nil)
 

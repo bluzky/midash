@@ -9,19 +9,27 @@ defmodule Midash.GitHub do
   @graphql_url "https://api.github.com/graphql"
 
   @query """
-  query($owner: String!, $repo: String!, $base: String!) {
+  query($owner: String!, $repo: String!) {
     repository(owner: $owner, name: $repo) {
-      pullRequests(states: OPEN, baseRefName: $base, first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+      pullRequests(states: OPEN, first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
         nodes {
           number
           title
           url
           createdAt
+          baseRefName
           author { login }
           reviews(first: 50) {
             nodes {
               state
               author { login }
+            }
+          }
+          reviewRequests(first: 20) {
+            nodes {
+              requestedReviewer {
+                ... on User { login }
+              }
             }
           }
         }
@@ -38,11 +46,11 @@ defmodule Midash.GitHub do
   - `"author"` — GitHub login string
   - `"reviews"` — list of `%{"state" => "APPROVED"|..., "author" => login}`
   """
-  def fetch_open_prs(token, owner, repo, base) do
+  def fetch_open_prs(token, owner, repo, _base) do
     body =
       Jason.encode!(%{
         query: @query,
-        variables: %{owner: owner, repo: repo, base: base}
+        variables: %{owner: owner, repo: repo}
       })
 
     headers = [
@@ -74,12 +82,18 @@ defmodule Midash.GitHub do
   end
 
   defp normalize_pr(node) do
+    review_requestees =
+      (get_in(node, ["reviewRequests", "nodes"]) || [])
+      |> Enum.map(fn rr -> get_in(rr, ["requestedReviewer", "login"]) end)
+      |> Enum.reject(&is_nil/1)
+
     %{
       "number" => node["number"],
       "title" => node["title"],
       "url" => node["url"],
       "html_url" => node["url"],
       "created_at" => node["createdAt"],
+      "base_ref" => node["baseRefName"],
       "author" => get_in(node, ["author", "login"]) || "ghost",
       "reviews" =>
         (get_in(node, ["reviews", "nodes"]) || [])
@@ -88,7 +102,8 @@ defmodule Midash.GitHub do
             "state" => r["state"],
             "author" => get_in(r, ["author", "login"]) || "ghost"
           }
-        end)
+        end),
+      "review_requestees" => review_requestees
     }
   end
 end
