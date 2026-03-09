@@ -12,7 +12,6 @@ defmodule Midash.Application do
 
     children = [
       MidashWeb.Telemetry,
-      Midash.Repo,
       {CubDB, data_dir: db_path, name: Midash.Store.DB},
       {DNSCluster, query: Application.get_env(:midash, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Midash.PubSub},

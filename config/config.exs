@@ -8,7 +8,6 @@
 import Config
 
 config :midash,
-  ecto_repos: [Midash.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
