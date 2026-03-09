@@ -1,12 +1,11 @@
 defmodule MidashWeb.Widgets.GithubMyPrsWidget do
   @moduledoc """
-  Shows all my open PRs targeting a base branch.
+  Shows all my open PRs excluding those targeting develop.
 
   Required assigns:
   - `repo`  - "owner/repo" string
   - `token` - GitHub personal access token
   - `me`    - your GitHub username
-  - `base`  - base branch (default "staging")
   """
   use MidashWeb, :live_component
 
@@ -70,14 +69,13 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
     repo = socket.assigns.repo
     token = socket.assigns.token
     me = socket.assigns.me
-    base = Map.get(socket.assigns, :base, "staging")
     [owner, repo_name] = String.split(repo, "/")
 
-    case Midash.GitHub.fetch_open_prs(token, owner, repo_name, base) do
+    case Midash.GitHub.fetch_open_prs(token, owner, repo_name) do
       {:ok, prs} ->
         my_prs =
           prs
-          |> Enum.filter(fn pr -> pr["author"] == me and pr["base_ref"] == base end)
+          |> Enum.filter(fn pr -> pr["author"] == me and pr["base_ref"] != "develop" end)
           |> Enum.map(fn pr ->
             approval_count = Enum.count(pr["reviews"], &(&1["state"] == "APPROVED"))
             Map.put(pr, :approvals, approval_count)

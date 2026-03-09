@@ -39,14 +39,16 @@ defmodule Midash.GitHub do
   """
 
   @doc """
-  Fetches open PRs targeting `base` for `owner/repo` via a single GraphQL call.
+  Fetches all open PRs for `owner/repo` via a single GraphQL call.
 
   Returns `{:ok, prs}` where each PR is a map with:
   - `"number"`, `"title"`, `"url"`, `"created_at"` (ISO 8601)
   - `"author"` — GitHub login string
+  - `"base_ref"` — target branch name
   - `"reviews"` — list of `%{"state" => "APPROVED"|..., "author" => login}`
+  - `"review_requestees"` — list of GitHub logins requested for review
   """
-  def fetch_open_prs(token, owner, repo, _base) do
+  def fetch_open_prs(token, owner, repo) do
     body =
       Jason.encode!(%{
         query: @query,

@@ -71,7 +71,6 @@ defmodule MidashWeb.WorkLive do
             id="work-innosync-pr-by-dev"
             repo="innoshiftco/innosync"
             token={@github_token}
-            base="staging"
           />
         </.widget>
 
@@ -86,7 +85,6 @@ defmodule MidashWeb.WorkLive do
             id="work-innoup-pr-by-dev"
             repo="innoshiftco/innoup"
             token={@github_token}
-            base="staging"
           />
         </.widget>
 
@@ -102,7 +100,6 @@ defmodule MidashWeb.WorkLive do
             repo="innoshiftco/innosync"
             token={@github_token}
             me={@github_username}
-            base="staging"
           />
         </.widget>
 
@@ -118,7 +115,6 @@ defmodule MidashWeb.WorkLive do
             repo="innoshiftco/innoup"
             token={@github_token}
             me={@github_username}
-            base="staging"
           />
         </.widget>
 
@@ -168,7 +164,6 @@ defmodule MidashWeb.WorkLive do
             repo="innoshiftco/innosync"
             token={@github_token}
             me={@github_username}
-            base="staging"
           />
         </.widget>
 
@@ -184,7 +179,6 @@ defmodule MidashWeb.WorkLive do
             repo="innoshiftco/innoup"
             token={@github_token}
             me={@github_username}
-            base="staging"
           />
         </.widget>
       </.col>

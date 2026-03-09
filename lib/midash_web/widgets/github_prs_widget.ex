@@ -1,11 +1,10 @@
 defmodule MidashWeb.Widgets.GithubPrsWidget do
   @moduledoc """
-  Shows open PRs grouped by author for a GitHub repo.
+  Shows open PRs grouped by author for a GitHub repo, excluding those targeting develop.
 
   Required assigns:
   - `repo`  - "owner/repo" string
   - `token` - GitHub personal access token
-  - `base`  - base branch (default "staging")
   """
   use MidashWeb, :live_component
 
@@ -45,7 +44,7 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
         <div :if={@prs != []} class="flex flex-wrap gap-3">
           <%= for {author, count} <- pr_by_author(@prs) do %>
             <a
-              href={"https://github.com/#{@repo}/pulls?q=is:pr+is:open+author:#{author}+base:#{@base}"}
+              href={"https://github.com/#{@repo}/pulls?q=is:pr+is:open+author:#{author}"}
               target="_blank"
               class="flex flex-col items-center rounded-md border border-border px-3 py-2 hover:bg-secondary transition-colors min-w-16"
             >
@@ -62,12 +61,12 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
   defp fetch_prs(socket) do
     repo = socket.assigns.repo
     token = socket.assigns.token
-    base = Map.get(socket.assigns, :base, "staging")
     [owner, repo_name] = String.split(repo, "/")
 
-    case Midash.GitHub.fetch_open_prs(token, owner, repo_name, base) do
+    case Midash.GitHub.fetch_open_prs(token, owner, repo_name) do
       {:ok, prs} ->
-        filtered = Enum.filter(prs, fn pr -> pr["base_ref"] == base end)
+        # Filter out PRs targeting develop
+        filtered = Enum.filter(prs, fn pr -> pr["base_ref"] != "develop" end)
         assign(socket, prs: filtered, loading: false, error: nil)
       {:error, reason} -> assign(socket, loading: false, error: reason)
     end

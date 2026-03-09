@@ -1,12 +1,11 @@
 defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
   @moduledoc """
-  Shows open PRs that the given user has NOT yet approved.
+  Shows open PRs that the given user has NOT yet approved, excluding those targeting develop.
 
   Required assigns:
   - `repo`      - "owner/repo" string
   - `token`     - GitHub personal access token
   - `me`        - your GitHub username (to check approval)
-  - `base`      - base branch (default "staging")
   """
   use MidashWeb, :live_component
 
@@ -71,10 +70,9 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
     repo = socket.assigns.repo
     token = socket.assigns.token
     me = socket.assigns.me
-    base = Map.get(socket.assigns, :base, "staging")
     [owner, repo_name] = String.split(repo, "/")
 
-    case Midash.GitHub.fetch_open_prs(token, owner, repo_name, base) do
+    case Midash.GitHub.fetch_open_prs(token, owner, repo_name) do
       {:ok, prs} ->
         pending =
           prs
@@ -83,12 +81,11 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
             approved_by = reviews |> Enum.filter(&(&1["state"] == "APPROVED")) |> Enum.map(& &1["author"])
             i_approved = me in approved_by
             i_requested = me in pr["review_requestees"]
-            targets_base = pr["base_ref"] == base
-            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by), i_requested: i_requested, targets_base: targets_base})
+            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by), i_requested: i_requested})
           end)
           |> Enum.reject(fn pr -> pr["author"] == me end)
-          |> Enum.filter(fn pr -> pr.targets_base or pr.i_requested end)
-          |> Enum.reject(fn pr -> pr.i_approved end)
+          |> Enum.filter(fn pr -> pr["base_ref"] != "develop" and not pr.i_approved end)
+          |> Enum.filter(fn pr -> pr.i_requested end)
 
         assign(socket, prs: pending, loading: false, error: nil)
 
