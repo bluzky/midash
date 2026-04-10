@@ -21,6 +21,9 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import {CodeJar} from "../vendor/codejar"
+import Prism from "prismjs"
+import "prismjs/components/prism-elixir"
 
 const THEMES = ["dark", "light", "ocean", "forest", "sunset", "midnight", "nord", "latte", "paper", "rose", "mint"]
 
@@ -89,7 +92,34 @@ const RefreshButton = {
   }
 }
 
-let hooks = { ThemeSwitcher, RefreshButton, FocusOnMount: { mounted() { this.el.focus() } } }
+const CodeJarHook = {
+  mounted() {
+    const highlight = (editor) => {
+      editor.innerHTML = Prism.highlight(editor.textContent, Prism.languages.elixir, "elixir")
+    }
+    this.jar = CodeJar(this.el, highlight, { tab: "  ", addClosing: false })
+    this.jar.updateCode(this.el.dataset.code || "")
+
+    // expose jar on the element so the Run button hook can read it
+    this.el._jar = this.jar
+  },
+  destroyed() {
+    if (this.jar) this.jar.destroy()
+  }
+}
+
+const RunButtonHook = {
+  mounted() {
+    this.el.addEventListener("click", (e) => {
+      e.preventDefault()
+      const editorEl = document.getElementById(this.el.dataset.editorId)
+      const code = editorEl?._jar?.toString() ?? ""
+      this.pushEventTo(this.el, "run", { code })
+    })
+  }
+}
+
+let hooks = { ThemeSwitcher, RefreshButton, FocusOnMount: { mounted() { this.el.focus() } }, CodeJarHook, RunButtonHook }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {

@@ -1,6 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "../node_modules/prismjs/themes/prism-tomorrow.css";
 
 /* This file is for your main application CSS */
 
@@ -375,4 +376,27 @@
 
 body {
   @apply bg-background text-foreground font-mono antialiased;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #barcode-grid,
+  #barcode-grid * {
+    visibility: visible;
+  }
+
+  #barcode-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+  }
 }

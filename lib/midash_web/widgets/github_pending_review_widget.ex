@@ -11,7 +11,7 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
 
   @impl true
   def mount(socket) do
-    {:ok, assign(socket, prs: [], loading: true, error: nil)}
+    {:ok, assign(socket, prs: [], loading: true, error: nil, author_filter: "all", authors: [])}
   end
 
   @impl true
@@ -34,6 +34,10 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
     {:noreply, socket |> assign(loading: true) |> fetch_pending()}
   end
 
+  def handle_event("filter_author", %{"author" => author}, socket) do
+    {:noreply, assign(socket, author_filter: author)}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -41,9 +45,24 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
       <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
       <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-muted-foreground text-xs">no prs need review</div>
-        <div :if={@prs != []} class="space-y-3">
-          <%= for pr <- @prs do %>
+        <div :if={@prs != []} class="mb-2 flex items-center justify-end gap-2">
+          <label for={"author-select-#{@id}"} class="text-muted-foreground text-xs">author:</label>
+          <form phx-change="filter_author" phx-target={@myself} class="flex items-center">
+            <select
+              id={"author-select-#{@id}"}
+              name="author"
+              class="bg-secondary border border-border rounded text-xs px-2 py-1 pr-6 text-foreground cursor-pointer appearance-none bg-no-repeat bg-right"
+            >
+              <option value="all" selected={@author_filter == "all"}>all</option>
+              <%= for author <- @authors do %>
+                <option value={author} selected={@author_filter == author}>@{author}</option>
+              <% end %>
+            </select>
+          </form>
+        </div>
+        <div :if={filtered_prs(@prs, @author_filter) == []} class="text-muted-foreground text-xs">no prs need review</div>
+        <div :if={filtered_prs(@prs, @author_filter) != []} class="space-y-3">
+          <%= for pr <- filtered_prs(@prs, @author_filter) do %>
             <div class="border-l-2 border-border pl-3">
               <a
                 href={pr["html_url"]}
@@ -66,6 +85,9 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
     """
   end
 
+  defp filtered_prs(prs, "all"), do: prs
+  defp filtered_prs(prs, author), do: Enum.filter(prs, &(&1["author"] == author))
+
   defp fetch_pending(socket) do
     repo = socket.assigns.repo
     token = socket.assigns.token
@@ -80,14 +102,13 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
             reviews = pr["reviews"]
             approved_by = reviews |> Enum.filter(&(&1["state"] == "APPROVED")) |> Enum.map(& &1["author"])
             i_approved = me in approved_by
-            i_requested = me in pr["review_requestees"]
-            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by), i_requested: i_requested})
+            Map.merge(pr, %{i_approved: i_approved, approvals: length(approved_by)})
           end)
           |> Enum.reject(fn pr -> pr["author"] == me end)
           |> Enum.filter(fn pr -> pr["base_ref"] != "develop" and not pr.i_approved end)
-          |> Enum.filter(fn pr -> pr.i_requested end)
 
-        assign(socket, prs: pending, loading: false, error: nil)
+        authors = pending |> Enum.map(& &1["author"]) |> Enum.uniq() |> Enum.sort()
+        assign(socket, prs: pending, authors: authors, loading: false, error: nil)
 
       {:error, reason} ->
         assign(socket, loading: false, error: reason)

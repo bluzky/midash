@@ -6,7 +6,8 @@ defmodule MidashWeb.Nav do
   @nav_pages [
     %{id: :home, label: "home", path: "/"},
     %{id: :work, label: "work", path: "/work"},
-    %{id: :monitor, label: "monitor", path: "/monitor"}
+    %{id: :monitor, label: "monitor", path: "/monitor"},
+    %{id: :toolkit, label: "toolkit", path: "/toolkit"}
   ]
 
   def pages, do: @nav_pages
@@ -26,6 +27,7 @@ defmodule MidashWeb.Nav do
       MidashWeb.HomeLive -> :home
       MidashWeb.WorkLive -> :work
       MidashWeb.MonitorLive -> :monitor
+      MidashWeb.ToolkitLive -> :toolkit
       _ -> nil
     end
   end

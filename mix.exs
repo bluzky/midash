@@ -57,7 +57,8 @@ defmodule Midash.MixProject do
       {:bandit, "~> 1.5"},
       {:lucide_icons, "~> 2.0"},
       {:cubdb, "~> 2.0"},
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+      {:barlix, "~> 0.6.4"}
     ]
   end
 
