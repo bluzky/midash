@@ -51,7 +51,7 @@ defmodule MidashWeb.DashboardComponents do
     ~H"""
     <div class="min-h-screen bg-background text-foreground font-mono">
       <.dashboard_nav current={@current} pages={@nav_pages} />
-      <div class="grid grid-cols-12 gap-4 p-4 items-start">
+      <div class="grid grid-cols-12 gap-4 p-4 items-start pt-[calc(36px+1rem)]">
         {render_slot(@inner_block)}
       </div>
     </div>
@@ -84,7 +84,7 @@ defmodule MidashWeb.DashboardComponents do
     assigns = assign(assigns, :themes, @themes)
 
     ~H"""
-    <nav class="flex items-center gap-1 border-b border-border bg-background px-4 py-2">
+    <nav class="fixed top-0 inset-x-0 z-50 flex items-center gap-1 border-b border-border bg-background px-4 py-2">
       <img src="/images/logo.svg" alt="midash" class="h-5 mr-2" />
       <%= for page <- @pages do %>
         <.link
