@@ -57,6 +57,19 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
                 <span class="text-warning">{pr[:approvals]} approvals</span>
                 <span>{relative_time(pr["created_at"])}</span>
               </div>
+              <div :if={pr["head_ref"]} class="flex items-center gap-1 mt-1">
+                <span class="text-xs text-muted-foreground font-mono truncate">{pr["head_ref"]}</span>
+                <button
+                  type="button"
+                  class="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                  title="Copy branch name"
+                  phx-hook="CopyToClipboard"
+                  id={"copy-branch-#{pr["number"]}"}
+                  data-copy={pr["head_ref"]}
+                >
+                  <Lucideicons.clipboard class="w-3 h-3" />
+                </button>
+              </div>
             </div>
           <% end %>
         </div>

@@ -18,6 +18,7 @@ defmodule Midash.GitHub do
           url
           createdAt
           baseRefName
+          headRefName
           author { login }
           reviews(first: 50) {
             nodes {
@@ -96,6 +97,7 @@ defmodule Midash.GitHub do
       "html_url" => node["url"],
       "created_at" => node["createdAt"],
       "base_ref" => node["baseRefName"],
+      "head_ref" => node["headRefName"],
       "author" => get_in(node, ["author", "login"]) || "ghost",
       "reviews" =>
         (get_in(node, ["reviews", "nodes"]) || [])

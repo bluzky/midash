@@ -60,10 +60,10 @@ defmodule MidashWeb.Widgets.SentryIssuesWidget do
           </select>
         </form>
       </div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
       <div :if={!@loading}>
-        <div :if={@issues == []} class="text-muted-foreground text-xs">no issues in 24h</div>
-        <div :if={@issues != []} class="text-xs w-full">
+        <div :if={@issues == []} class="text-muted-foreground text-sm">no issues in 24h</div>
+        <div :if={@issues != []} class="text-sm w-full">
           <table class="w-full table-fixed">
             <thead>
               <tr class="border-b border-border text-muted-foreground text-[11px]">
@@ -152,9 +152,11 @@ defmodule MidashWeb.Widgets.SentryIssuesWidget do
     environment = Map.get(socket.assigns, :environment, nil)
     sort = socket.assigns.sort
 
-    # Build filters for last 24 hours
+    require Logger
+    Logger.info("[SentryIssuesWidget] fetching issues org=#{org_slug} project=#{project_slug} env=#{Kernel.inspect(environment)} sort=#{sort}")
+
     filters = %{
-      "query" => "lastSeen:>=#{yesterday_iso()}"
+      "query" => "is:unresolved lastSeen:>=#{yesterday_iso()}"
     }
 
     filters =
@@ -162,11 +164,14 @@ defmodule MidashWeb.Widgets.SentryIssuesWidget do
 
     case Sentry.fetch_issues(org_slug, project_slug, filters, sort: sort) do
       {:ok, issues} ->
+        Logger.info("[SentryIssuesWidget] fetched #{length(issues)} issues for #{org_slug}/#{project_slug} (#{environment})")
         assign(socket, issues: issues, loading: false, error: nil)
 
       {:error, reason} ->
+        Logger.error("[SentryIssuesWidget] fetch failed for #{org_slug}/#{project_slug} (#{environment}): #{Kernel.inspect(reason)}")
         assign(socket, loading: false, error: reason)
     end
+    |> push_event("refresh_done", %{id: socket.assigns.id})
   end
 
   defp yesterday_iso do
