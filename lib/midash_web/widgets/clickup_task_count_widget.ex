@@ -44,8 +44,8 @@ defmodule MidashWeb.Widgets.ClickupTaskCountWidget do
 
     ~H"""
     <div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-sm py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <div class="flex gap-2 flex-wrap">
           <%= for s <- @statuses do %>
@@ -62,9 +62,12 @@ defmodule MidashWeb.Widgets.ClickupTaskCountWidget do
   end
 
   defp fetch_tasks(socket) do
-    case Clickup.fetch_tasks(socket.assigns.token, socket.assigns.team_id, socket.assigns.user_id) do
-      {:ok, tasks} -> assign(socket, tasks: tasks, loading: false, error: nil)
-      {:error, msg} -> assign(socket, loading: false, error: msg)
-    end
+    socket =
+      case Clickup.fetch_tasks(socket.assigns.token, socket.assigns.team_id, socket.assigns.user_id) do
+        {:ok, tasks} -> assign(socket, tasks: tasks, loading: false, error: nil)
+        {:error, msg} -> assign(socket, loading: false, error: msg)
+      end
+
+    push_event(socket, "refresh_done", %{id: socket.assigns.id})
   end
 end

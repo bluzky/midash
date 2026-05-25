@@ -44,8 +44,8 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
 
     ~H"""
     <div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-sm py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <%= for s <- @statuses do %>
           <% status_tasks = Clickup.filter_by_status(@tasks, s.key) %>
@@ -56,13 +56,12 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
             <div class="space-y-1">
               <%= for task <- status_tasks do %>
                 <div class="flex items-start gap-2">
-                  <span class="text-border text-xs shrink-0 mt-0.5">—</span>
                   <a
                     href={task["url"]}
                     target="_blank"
-                    class="text-xs text-foreground hover:text-foreground/90 hover:underline leading-snug"
+                    class="text-sm text-foreground hover:text-foreground/90 hover:underline leading-snug"
                   >
-                    {task["name"]}
+                    - {task["name"]}
                   </a>
                   <span :if={task["due_date"]} class="text-muted-foreground text-xs shrink-0 ml-auto">
                     {Clickup.format_due(task["due_date"])}
@@ -73,16 +72,19 @@ defmodule MidashWeb.Widgets.ClickupTaskListWidget do
           </div>
         <% end %>
 
-        <div :if={@tasks == []} class="text-muted-foreground text-xs">no tasks</div>
+        <div :if={@tasks == []} class="text-muted-foreground text-sm">no tasks</div>
       </div>
     </div>
     """
   end
 
   defp fetch_tasks(socket) do
-    case Clickup.fetch_tasks(socket.assigns.token, socket.assigns.team_id, socket.assigns.user_id) do
-      {:ok, tasks} -> assign(socket, tasks: tasks, loading: false, error: nil)
-      {:error, msg} -> assign(socket, loading: false, error: msg)
-    end
+    socket =
+      case Clickup.fetch_tasks(socket.assigns.token, socket.assigns.team_id, socket.assigns.user_id) do
+        {:ok, tasks} -> assign(socket, tasks: tasks, loading: false, error: nil)
+        {:error, msg} -> assign(socket, loading: false, error: msg)
+      end
+
+    push_event(socket, "refresh_done", %{id: socket.assigns.id})
   end
 end

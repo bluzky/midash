@@ -193,6 +193,7 @@ defmodule MidashWeb.DashboardComponents do
             :if={@on_refresh}
             id={"#{@id}-refresh-btn"}
             phx-hook="RefreshButton"
+            data-widget-id={@id}
             phx-click={
               %Phoenix.LiveView.JS{
                 ops:

@@ -38,17 +38,17 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
   def render(assigns) do
     ~H"""
     <div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-sm py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-muted-foreground text-xs">no open prs</div>
+        <div :if={@prs == []} class="text-muted-foreground text-sm">no open prs</div>
         <div :if={@prs != []} class="space-y-3">
           <%= for pr <- @prs do %>
             <div class="border-l-2 border-border pl-3">
               <a
                 href={pr["html_url"]}
                 target="_blank"
-                class="text-xs text-info hover:underline block mb-1"
+                class="text-sm text-info hover:underline block mb-1"
               >
                 <span class="text-muted-foreground">#<%= pr["number"] %></span>
                 {pr["title"]}
@@ -85,6 +85,7 @@ defmodule MidashWeb.Widgets.GithubMyPrsWidget do
       {:error, reason} ->
         assign(socket, loading: false, error: reason)
     end
+    |> push_event("refresh_done", %{id: socket.assigns.id})
   end
 
   defp relative_time(iso) do

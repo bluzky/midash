@@ -37,10 +37,10 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
   def render(assigns) do
     ~H"""
     <div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-sm py-2">{@error}</div>
       <div :if={!@loading && !@error}>
-        <div :if={@prs == []} class="text-muted-foreground text-xs">no open prs</div>
+        <div :if={@prs == []} class="text-muted-foreground text-sm">no open prs</div>
         <div :if={@prs != []} class="flex flex-wrap gap-3">
           <%= for {author, count} <- pr_by_author(@prs) do %>
             <a
@@ -70,6 +70,7 @@ defmodule MidashWeb.Widgets.GithubPrsWidget do
         assign(socket, prs: filtered, loading: false, error: nil)
       {:error, reason} -> assign(socket, loading: false, error: reason)
     end
+    |> push_event("refresh_done", %{id: socket.assigns.id})
   end
 
   defp pr_by_author(prs) do

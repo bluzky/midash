@@ -63,6 +63,6 @@ defmodule Midash.Clickup do
   end
 
   defp matches_status?(task, status_key) do
-    String.downcase(task["status"]["status"] || "") =~ status_key
+    String.downcase(task["status"]["status"] || "") == status_key
   end
 end

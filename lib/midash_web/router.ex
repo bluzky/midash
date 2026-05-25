@@ -23,6 +23,7 @@ defmodule MidashWeb.Router do
     live "/toolkit", ToolkitLive
     live "/toolkit/elixir-execute", ElixirExecuteLive
     live "/toolkit/barcode", BarcodeLive
+    live "/crypto", CryptoLive
   end
 
   # Other scopes may use custom stacks.

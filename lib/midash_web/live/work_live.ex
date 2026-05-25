@@ -2,9 +2,9 @@ defmodule MidashWeb.WorkLive do
   use MidashWeb, :live_view
 
   alias MidashWeb.Widgets.{
-    GithubPrsWidget,
-    GithubPendingReviewWidget,
-    GithubMyPrsWidget,
+    GithubPrsMultiWidget,
+    GithubPendingReviewMultiWidget,
+    GithubMyPrsMultiWidget,
     ClickupTaskCountWidget,
     ClickupTaskListWidget,
     QuickNoteWidget
@@ -29,18 +29,18 @@ defmodule MidashWeb.WorkLive do
   end
 
   @impl true
-  def handle_info({:fetch_github_prs, id}, socket) do
-    send_update(GithubPrsWidget, id: id, action: :fetch)
+  def handle_info({:fetch_github_prs_multi, id}, socket) do
+    send_update(GithubPrsMultiWidget, id: id, action: :fetch)
     {:noreply, socket}
   end
 
-  def handle_info({:fetch_pending_review, id}, socket) do
-    send_update(GithubPendingReviewWidget, id: id, action: :fetch)
+  def handle_info({:fetch_pending_review_multi, id}, socket) do
+    send_update(GithubPendingReviewMultiWidget, id: id, action: :fetch)
     {:noreply, socket}
   end
 
-  def handle_info({:fetch_my_prs, id}, socket) do
-    send_update(GithubMyPrsWidget, id: id, action: :fetch)
+  def handle_info({:fetch_my_prs_multi, id}, socket) do
+    send_update(GithubMyPrsMultiWidget, id: id, action: :fetch)
     {:noreply, socket}
   end
 
@@ -61,58 +61,44 @@ defmodule MidashWeb.WorkLive do
       <%!-- Left column: GitHub PRs --%>
       <.col span={4}>
         <.widget
-          id="w-innosync-prs"
-          title="innosync — pr by dev"
-          on_refresh={JS.push("refresh", value: %{id: "work-innosync-pr-by-dev", module: "Elixir.MidashWeb.Widgets.GithubPrsWidget"})}
+          id="w-all-prs"
+          title="pr by dev"
+          on_refresh={JS.push("refresh", value: %{id: "work-all-pr-by-dev", module: "Elixir.MidashWeb.Widgets.GithubPrsMultiWidget"})}
           collapsible
         >
           <.live_component
-            module={GithubPrsWidget}
-            id="work-innosync-pr-by-dev"
-            repo="innoshiftco/innosync"
+            module={GithubPrsMultiWidget}
+            id="work-all-pr-by-dev"
+            repos={["innoshiftco/innosync", "innoshiftco/innoup", "innoshiftco/innowa"]}
             token={@github_token}
           />
         </.widget>
 
         <.widget
-          id="w-innoup-prs"
-          title="innoup — pr by dev"
-          on_refresh={JS.push("refresh", value: %{id: "work-innoup-pr-by-dev", module: "Elixir.MidashWeb.Widgets.GithubPrsWidget"})}
+          id="w-my-prs"
+          title="my prs"
+          on_refresh={JS.push("refresh", value: %{id: "work-my-prs", module: "Elixir.MidashWeb.Widgets.GithubMyPrsMultiWidget"})}
           collapsible
         >
           <.live_component
-            module={GithubPrsWidget}
-            id="work-innoup-pr-by-dev"
-            repo="innoshiftco/innoup"
-            token={@github_token}
-          />
-        </.widget>
-
-        <.widget
-          id="w-innosync-my-prs"
-          title="innosync — my prs"
-          on_refresh={JS.push("refresh", value: %{id: "work-innosync-my-prs", module: "Elixir.MidashWeb.Widgets.GithubMyPrsWidget"})}
-          collapsible
-        >
-          <.live_component
-            module={GithubMyPrsWidget}
-            id="work-innosync-my-prs"
-            repo="innoshiftco/innosync"
+            module={GithubMyPrsMultiWidget}
+            id="work-my-prs"
+            repos={["innoshiftco/innoup", "innoshiftco/innosync", "innoshiftco/innowa"]}
             token={@github_token}
             me={@github_username}
           />
         </.widget>
 
         <.widget
-          id="w-innoup-my-prs"
-          title="innoup — my prs"
-          on_refresh={JS.push("refresh", value: %{id: "work-innoup-my-prs", module: "Elixir.MidashWeb.Widgets.GithubMyPrsWidget"})}
+          id="w-pending-review"
+          title="pending review"
+          on_refresh={JS.push("refresh", value: %{id: "work-pending-review", module: "Elixir.MidashWeb.Widgets.GithubPendingReviewMultiWidget"})}
           collapsible
         >
           <.live_component
-            module={GithubMyPrsWidget}
-            id="work-innoup-my-prs"
-            repo="innoshiftco/innoup"
+            module={GithubPendingReviewMultiWidget}
+            id="work-pending-review"
+            repos={["innoshiftco/innoup", "innoshiftco/innosync", "innoshiftco/innowa"]}
             token={@github_token}
             me={@github_username}
           />
@@ -120,7 +106,7 @@ defmodule MidashWeb.WorkLive do
 
       </.col>
 
-      <%!-- Center column: ClickUp tasks + pending reviews --%>
+      <%!-- Center column: ClickUp tasks --%>
       <.col span={4}>
         <.widget
           id="w-clickup-count"
@@ -149,36 +135,6 @@ defmodule MidashWeb.WorkLive do
             token={@clickup_token}
             team_id={@clickup_team_id}
             user_id={@clickup_user_id}
-          />
-        </.widget>
-
-        <.widget
-          id="w-innosync-pending"
-          title="innosync — pending review"
-          on_refresh={JS.push("refresh", value: %{id: "work-innosync-pending-review", module: "Elixir.MidashWeb.Widgets.GithubPendingReviewWidget"})}
-          collapsible
-        >
-          <.live_component
-            module={GithubPendingReviewWidget}
-            id="work-innosync-pending-review"
-            repo="innoshiftco/innosync"
-            token={@github_token}
-            me={@github_username}
-          />
-        </.widget>
-
-        <.widget
-          id="w-innoup-pending"
-          title="innoup — pending review"
-          on_refresh={JS.push("refresh", value: %{id: "work-innoup-pending-review", module: "Elixir.MidashWeb.Widgets.GithubPendingReviewWidget"})}
-          collapsible
-        >
-          <.live_component
-            module={GithubPendingReviewWidget}
-            id="work-innoup-pending-review"
-            repo="innoshiftco/innoup"
-            token={@github_token}
-            me={@github_username}
           />
         </.widget>
       </.col>

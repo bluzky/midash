@@ -42,8 +42,8 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
   def render(assigns) do
     ~H"""
     <div>
-      <div :if={@loading} class="text-muted-foreground text-xs py-2">fetching...</div>
-      <div :if={@error} class="text-destructive text-xs py-2">{@error}</div>
+      <div :if={@loading} class="text-muted-foreground text-sm py-2">fetching...</div>
+      <div :if={@error} class="text-destructive text-sm py-2">{@error}</div>
       <div :if={!@loading && !@error}>
         <div :if={@prs != []} class="mb-2 flex items-center justify-end gap-2">
           <label for={"author-select-#{@id}"} class="text-muted-foreground text-xs">author:</label>
@@ -60,14 +60,14 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
             </select>
           </form>
         </div>
-        <div :if={filtered_prs(@prs, @author_filter) == []} class="text-muted-foreground text-xs">no prs need review</div>
+        <div :if={filtered_prs(@prs, @author_filter) == []} class="text-muted-foreground text-sm">no prs need review</div>
         <div :if={filtered_prs(@prs, @author_filter) != []} class="space-y-3">
           <%= for pr <- filtered_prs(@prs, @author_filter) do %>
             <div class="border-l-2 border-border pl-3">
               <a
                 href={pr["html_url"]}
                 target="_blank"
-                class="text-xs text-info hover:underline block mb-1"
+                class="text-sm text-info hover:underline block mb-1"
               >
                 <span class="text-muted-foreground">#<%= pr["number"] %></span>
                 {pr["title"]}
@@ -113,6 +113,7 @@ defmodule MidashWeb.Widgets.GithubPendingReviewWidget do
       {:error, reason} ->
         assign(socket, loading: false, error: reason)
     end
+    |> push_event("refresh_done", %{id: socket.assigns.id})
   end
 
   defp relative_time(iso) do
