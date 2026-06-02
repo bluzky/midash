@@ -51,7 +51,7 @@ defmodule MidashWeb.DashboardComponents do
     ~H"""
     <div class="min-h-screen bg-background text-foreground font-mono">
       <.dashboard_nav current={@current} pages={@nav_pages} />
-      <div class="grid grid-cols-12 gap-4 p-4 items-start pt-[calc(36px+1rem)]">
+      <div class="grid grid-cols-12 gap-4 px-4 py-6 items-start pt-[calc(36px+1.5rem)]">
         {render_slot(@inner_block)}
       </div>
     </div>
@@ -176,6 +176,7 @@ defmodule MidashWeb.DashboardComponents do
   attr :id, :string, default: nil
   attr :title, :string, default: nil
   attr :class, :string, default: nil
+  attr :header_class, :string, default: ""
   attr :on_refresh, :any, default: nil
   attr :collapsible, :boolean, default: false
   slot :inner_block, required: true
@@ -185,7 +186,7 @@ defmodule MidashWeb.DashboardComponents do
     <div class={["mb-4 rounded-lg border border-border bg-card shadow-sm last:mb-0", @class]}>
       <div
         :if={@title}
-        class="px-4 py-2.5 border-b border-border text-xs text-muted-foreground uppercase tracking-widest flex items-center justify-between"
+        class={["px-4 py-2.5 border-b border-border text-xs uppercase tracking-widest flex items-center justify-between", if(@header_class != "", do: @header_class, else: "text-muted-foreground")]}
       >
         <span>{@title}</span>
         <span :if={@on_refresh || @collapsible} class="flex items-center gap-1">

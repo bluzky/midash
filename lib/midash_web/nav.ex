@@ -7,6 +7,7 @@ defmodule MidashWeb.Nav do
     %{id: :home, label: "home", path: "/"},
     %{id: :work, label: "work", path: "/work"},
     %{id: :monitor, label: "monitor", path: "/monitor"},
+    %{id: :argocd, label: "argocd", path: "/argocd"},
     %{id: :toolkit, label: "toolkit", path: "/toolkit"},
     %{id: :crypto, label: "crypto", path: "/crypto"}
   ]
@@ -30,6 +31,7 @@ defmodule MidashWeb.Nav do
       MidashWeb.MonitorLive -> :monitor
       MidashWeb.ToolkitLive -> :toolkit
       MidashWeb.CryptoLive -> :crypto
+      MidashWeb.ArgoCDLive -> :argocd
       _ -> nil
     end
   end

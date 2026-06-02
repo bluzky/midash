@@ -24,6 +24,7 @@ defmodule MidashWeb.Router do
     live "/toolkit/elixir-execute", ElixirExecuteLive
     live "/toolkit/barcode", BarcodeLive
     live "/crypto", CryptoLive
+    live "/argocd", ArgoCDLive
   end
 
   # Other scopes may use custom stacks.
