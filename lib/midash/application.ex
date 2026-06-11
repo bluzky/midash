@@ -17,6 +17,7 @@ defmodule Midash.Application do
       {Phoenix.PubSub, name: Midash.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Midash.Finch},
+      Midash.RequestBin,
       # Start a worker by calling: Midash.Worker.start_link(arg)
       # {Midash.Worker, arg},
       # Start to serve requests, typically the last entry

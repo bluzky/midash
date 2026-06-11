@@ -14,6 +14,10 @@ defmodule MidashWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :bin_receiver do
+    plug :accepts, ["json", "html", "text", "*/*"]
+  end
+
   scope "/", MidashWeb do
     pipe_through :browser
 
@@ -23,8 +27,17 @@ defmodule MidashWeb.Router do
     live "/toolkit", ToolkitLive
     live "/toolkit/elixir-execute", ElixirExecuteLive
     live "/toolkit/barcode", BarcodeLive
+    live "/toolkit/postbin", PostBinLive
+    live "/toolkit/postbin/:bin_id", PostBinLive
     live "/crypto", CryptoLive
     live "/argocd", ArgoCDLive
+  end
+
+  scope "/bin/:bin_id", MidashWeb do
+    pipe_through :bin_receiver
+
+    match :*, "/", RequestBinPlug, []
+    match :*, "/*path", RequestBinPlug, []
   end
 
   # Other scopes may use custom stacks.

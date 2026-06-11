@@ -32,6 +32,7 @@ defmodule MidashWeb.Nav do
       MidashWeb.ToolkitLive -> :toolkit
       MidashWeb.CryptoLive -> :crypto
       MidashWeb.ArgoCDLive -> :argocd
+      MidashWeb.PostBinLive -> :toolkit
       _ -> nil
     end
   end
