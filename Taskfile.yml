@@ -7,4 +7,4 @@ tasks:
   dev:
     desc: Start Phoenix dev server with .env loaded
     cmds:
-      - mix phx.server
+      - iex -S mix phx.server

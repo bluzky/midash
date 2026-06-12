@@ -4,7 +4,9 @@ defmodule MidashWeb.ToolkitLive do
   @tools [
     %{id: :elixir_execute, label: "Elixir Execute", description: "Run Elixir code with an input string", path: "/toolkit/elixir-execute"},
     %{id: :barcode, label: "Barcode Generator", description: "Generate Code128 barcodes, one per line, printable 2-column grid", path: "/toolkit/barcode"},
-    %{id: :postbin, label: "PostBin", description: "Inspect HTTP requests — capture headers, query params, and body in real time", path: "/toolkit/postbin"}
+    %{id: :postbin, label: "PostBin", description: "Inspect HTTP requests — capture headers, query params, and body in real time", path: "/toolkit/postbin"},
+    %{id: :mau, label: "Mau Template", description: "Render Mau (Liquid-inspired) templates with JSON context params", path: "/toolkit/mau"},
+    %{id: :map_to_json, label: "Map → JSON", description: "Convert Elixir map syntax to prettified JSON", path: "/toolkit/map-to-json"}
   ]
 
   @impl true

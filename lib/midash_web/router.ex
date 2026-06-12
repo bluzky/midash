@@ -29,6 +29,8 @@ defmodule MidashWeb.Router do
     live "/toolkit/barcode", BarcodeLive
     live "/toolkit/postbin", PostBinLive
     live "/toolkit/postbin/:bin_id", PostBinLive
+    live "/toolkit/mau", MauLive
+    live "/toolkit/map-to-json", MapToJsonLive
     live "/crypto", CryptoLive
     live "/argocd", ArgoCDLive
   end

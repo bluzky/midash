@@ -58,7 +58,8 @@ defmodule Midash.MixProject do
       {:lucide_icons, "~> 2.0"},
       {:cubdb, "~> 2.0"},
       {:tzdata, "~> 1.1"},
-      {:barlix, "~> 0.6.4"}
+      {:barlix, "~> 0.6.4"},
+      {:mau, "~> 0.7"}
     ]
   end
 
