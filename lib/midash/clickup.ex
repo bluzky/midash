@@ -8,14 +8,25 @@ defmodule Midash.Clickup do
     %{key: "in progress", label: "in progress", color: "#fbbf24"},
     %{key: "in review", label: "in review", color: "#a78bfa"},
     %{key: "dev ready", label: "dev ready", color: "#34d399"},
-    %{key: "verified", label: "verified", color: "#22d3ee"}
+    %{key: "verified", label: "verified", color: "#22d3ee"},
+    %{key: "ready for pro", label: "ready for pro", color: "#60a5fa"},
+    %{key: "completed", label: "completed", color: "#4ade80"}
   ]
 
   def statuses, do: @statuses
 
   def fetch_tasks(token, team_id, user_id) do
+    cond do
+      token == "" -> {:error, "CLICKUP_TOKEN not configured"}
+      team_id == "" -> {:error, "CLICKUP_TEAM_ID not configured"}
+      user_id == "" -> {:error, "CLICKUP_USER_ID not configured"}
+      true -> do_fetch_tasks(token, team_id, user_id)
+    end
+  end
+
+  defp do_fetch_tasks(token, team_id, user_id) do
     url =
-      "https://api.clickup.com/api/v2/team/#{team_id}/task?assignees[]=#{user_id}&include_closed=false"
+      "https://api.clickup.com/api/v2/team/#{team_id}/task?assignees[]=#{user_id}&include_closed=true"
 
     req = Finch.build(:get, url, [{"Authorization", token}])
 

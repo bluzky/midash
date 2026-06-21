@@ -77,19 +77,24 @@ defmodule Midash.ArgoCD do
 
   defp get(url, token) do
     headers = [
-      {~c"Authorization", String.to_charlist("Bearer #{token}")},
-      {~c"Content-Type", ~c"application/json"}
+      {"Authorization", "Bearer #{token}"},
+      {"Content-Type", "application/json"}
     ]
 
-    case :httpc.request(:get, {String.to_charlist(url), headers}, [{:ssl, [{:verify, :verify_none}]}], []) do
-      {:ok, {{_, 200, _}, _headers, body}} ->
-        case Jason.decode(List.to_string(body)) do
+    opts = [ssl_options: [{:verify, :verify_none}]]
+
+    case :hackney.get(url, headers, "", opts) do
+      {:ok, 200, _headers, ref} ->
+        {:ok, body} = :hackney.body(ref)
+
+        case Jason.decode(body) do
           {:ok, data} -> {:ok, data}
           {:error, _} -> {:error, "failed to parse response"}
         end
 
-      {:ok, {{_, status, _}, _headers, body}} ->
-        {:error, "HTTP #{status}: #{List.to_string(body)}"}
+      {:ok, status, _headers, ref} ->
+        {:ok, body} = :hackney.body(ref)
+        {:error, "HTTP #{status}: #{body}"}
 
       {:error, reason} ->
         {:error, inspect(reason)}

@@ -12,27 +12,39 @@ defmodule MidashWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
+    plug :protect_from_forgery
   end
 
   pipeline :bin_receiver do
     plug :accepts, ["json", "html", "text", "*/*"]
   end
 
-  scope "/", MidashWeb do
-    pipe_through :browser
+  scope "/api", MidashWeb.API do
+    pipe_through :api
 
-    live "/", HomeLive
-    live "/work", WorkLive
-    live "/monitor", MonitorLive
-    live "/toolkit", ToolkitLive
-    live "/toolkit/elixir-execute", ElixirExecuteLive
-    live "/toolkit/barcode", BarcodeLive
-    live "/toolkit/postbin", PostBinLive
-    live "/toolkit/postbin/:bin_id", PostBinLive
-    live "/toolkit/mau", MauLive
-    live "/toolkit/map-to-json", MapToJsonLive
-    live "/crypto", CryptoLive
-    live "/argocd", ArgoCDLive
+    get "/crypto/funding", CryptoController, :funding
+    get "/crypto/klines", CryptoController, :klines
+
+    get "/github/prs", GithubController, :prs
+    get "/github/my-prs", GithubController, :my_prs
+    get "/github/pending-review", GithubController, :pending_review
+
+    get "/clickup/tasks", ClickupController, :tasks
+
+    get "/sentry/issues", SentryController, :issues
+
+    get "/argocd/apps", ArgoCDController, :apps
+
+    post "/toolkit/execute", ToolkitController, :execute
+    post "/toolkit/barcode", ToolkitController, :barcode
+    post "/toolkit/mau", ToolkitController, :mau
+    post "/toolkit/map-to-json", ToolkitController, :map_to_json
+
+    get "/postbin/bins", PostbinController, :index
+    post "/postbin/bins", PostbinController, :create
+    get "/postbin/bins/:id/requests", PostbinController, :requests
+    delete "/postbin/bins/:id", PostbinController, :delete
   end
 
   scope "/bin/:bin_id", MidashWeb do
@@ -42,18 +54,8 @@ defmodule MidashWeb.Router do
     match :*, "/*path", RequestBinPlug, []
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", MidashWeb do
-  #   pipe_through :api
-  # end
-
-  # Enable LiveDashboard and Swoosh mailbox preview in development
+  # Dev routes must come before the SPA catch-all
   if Application.compile_env(:midash, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
@@ -62,5 +64,12 @@ defmodule MidashWeb.Router do
       live_dashboard "/dashboard", metrics: MidashWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  # SPA catch-all — must be last
+  scope "/", MidashWeb do
+    pipe_through :browser
+
+    get "/*path", PageController, :index
   end
 end

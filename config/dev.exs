@@ -15,8 +15,7 @@ config :midash, MidashWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "EuHvDeHmJNWPUyqU8PdhxKiZnR4+1ic9qhzGCLymT66wDGRH0U44rwkIbCTIb0K4",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:midash, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:midash, ~w(--watch)]}
+    npm: ["run", "dev", cd: Path.expand("../assets", __DIR__)]
   ]
 
 # ## SSL Support
