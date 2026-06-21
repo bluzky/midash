@@ -1,9 +1,13 @@
 <script>
+  import { onMount, untrack } from 'svelte'
+  import { createChart, CandlestickSeries as CandleSeries, HistogramSeries as VolSeries, LineStyle } from 'lightweight-charts'
   import { ToggleGroup } from 'bits-ui'
   import { get } from '../lib/api.js'
+  import { bollingerBands, ema } from '../lib/indicators/index.js'
   import Spinner from '../components/Spinner.svelte'
+  import { baseChartOptions } from '../lib/chart-theme.js'
 
-  let { symbols = ['ETHUSDT', 'BTCUSDT'] } = $props()
+  let { symbol = 'ETHUSDT', indicators = [bollingerBands(), ema({ period: 9, color: '#EAB308' }), ema({ period: 21, color: '#EC4899' })] } = $props()
 
   const INTERVALS = [
     { key: '15m', label: '15m' },
@@ -11,72 +15,132 @@
     { key: '4h', label: '4h' },
     { key: '1d', label: '1d' },
   ]
-  const CHART_H = 150
-  const VISIBLE = 72
+  const CANDLE_H = 260
+  const VOLUME_H = 60
+  const CHART_H = CANDLE_H + VOLUME_H
+  const CANDLE_PX = 8  // px per candle — matches default lightweight-charts bar spacing
 
-  let interval = $state('1h')
-  let charts = $state({})
+  const warmup = Math.max(0, ...indicators.map((ind) => ind.warmup ?? 0))
+
+  let containerWidth = $state(0)
+  let visible = $derived(containerWidth > 0 ? Math.floor(containerWidth / CANDLE_PX) : 0)
+
+  let interval = $state('15m')
+  let chartData = $state(null)
   let loading = $state(true)
   let countdown = $state(60)
 
   async function fetchAll() {
+    if (visible === 0) return
     loading = true
-    const results = {}
-    for (const sym of symbols) {
-      try {
-        const res = await get(`/api/crypto/klines?symbol=${sym}&interval=${interval}&limit=${VISIBLE + 20}`)
-        results[sym] = { candles: res.data.slice(-VISIBLE), error: null }
-      } catch (e) {
-        results[sym] = { candles: [], error: e.message }
+    try {
+      const [kRes, dayRes] = await Promise.all([
+        get(`/api/crypto/klines?symbol=${symbol}&interval=${interval}&limit=${visible + warmup}`),
+        get(`/api/crypto/klines?symbol=${symbol}&interval=1d&limit=2`),
+      ])
+      const allMapped = kRes.data.map((c) => ({
+        time: Math.floor(c.open_time / 1000),
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+      }))
+      const prevDay = dayRes.data[0]
+      chartData = {
+        candles: allMapped.slice(-visible),
+        volume: kRes.data.slice(-visible).map((c) => ({
+          time: Math.floor(c.open_time / 1000),
+          value: c.volume,
+          color: c.close >= c.open ? '#16a34a66' : '#dc262666',
+        })),
+        indicatorData: indicators.map((ind) => ind.compute(allMapped).slice(-visible)),
+        pdHigh: prevDay?.high ?? null,
+        pdLow: prevDay?.low ?? null,
+        last: kRes.data.at(-1),
+        error: null,
       }
+    } catch (e) {
+      chartData = { candles: [], volume: [], indicatorData: [], pdHigh: null, pdLow: null, last: null, error: e.message }
     }
-    charts = results
     loading = false
     countdown = 60
   }
 
   export async function refresh() { await fetchAll() }
 
-  fetchAll()
+  // Re-fetch when container width changes (initial mount + window resize).
+  // Debounced so rapid resize events don't trigger many API calls.
+  // untrack(fetchAll) prevents interval/$state reads inside fetchAll from
+  // becoming dependencies of this effect and causing extra re-runs.
+  $effect(() => {
+    const v = visible
+    if (v === 0) return
+    const t = setTimeout(() => untrack(fetchAll), 150)
+    return () => clearTimeout(t)
+  })
 
-  const refreshInterval = setInterval(fetchAll, 60_000)
-  const countdownInterval = setInterval(() => { if (countdown > 0) countdown-- }, 1000)
-  $effect(() => () => { clearInterval(refreshInterval); clearInterval(countdownInterval) })
+  onMount(() => {
+    const refreshInterval = setInterval(fetchAll, 60_000)
+    const countdownInterval = setInterval(() => { if (countdown > 0) countdown-- }, 1000)
+    return () => { clearInterval(refreshInterval); clearInterval(countdownInterval) }
+  })
 
-  function renderSVG(candles) {
-    if (!candles?.length) return ''
-    const prices = candles.flatMap((c) => [c.high, c.low])
-    const minP = Math.min(...prices)
-    const maxP = Math.max(...prices)
-    const range = maxP - minP || 1
-    const W = 600
-    const cw = Math.floor(W / candles.length)
-    const gap = Math.max(1, Math.floor(cw * 0.15))
-    const bw = Math.max(1, cw - gap * 2)
+  const PD_LINE = { color: '#2563EB', lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true }
 
-    function py(price) {
-      return CHART_H - ((price - minP) / range) * CHART_H
+  function setPriceLines(series, pdHigh, pdLow) {
+    const high = pdHigh != null ? series.createPriceLine({ ...PD_LINE, price: pdHigh, title: 'PDH' }) : null
+    const low  = pdLow  != null ? series.createPriceLine({ ...PD_LINE, price: pdLow,  title: 'PDL' }) : null
+    return { high, low }
+  }
+
+  function candleChart(node, params) {
+    const chart = createChart(node, { ...baseChartOptions, width: node.clientWidth, height: CHART_H })
+
+    const candleSeries = chart.addSeries(CandleSeries, {
+      upColor: '#16a34a',
+      downColor: '#dc2626',
+      borderVisible: false,
+      wickUpColor: '#16a34a',
+      wickDownColor: '#dc2626',
+    })
+
+    const mounted = indicators.map((ind) => ind.mount(chart))
+
+    const volSeries = chart.addSeries(VolSeries, {
+      priceScaleId: 'volume',
+      priceFormat: { type: 'volume' },
+    })
+    volSeries.priceScale().applyOptions({ scaleMargins: { top: 0.75, bottom: 0 } })
+
+    candleSeries.setData(params.candles)
+    volSeries.setData(params.volume)
+    mounted.forEach((m, i) => m.update(params.indicatorData[i] ?? []))
+
+    let pdLines = setPriceLines(candleSeries, params.pdHigh, params.pdLow)
+
+    const ro = new ResizeObserver(() => chart.resize(node.clientWidth, CHART_H))
+    ro.observe(node)
+
+    return {
+      update(p) {
+        candleSeries.setData(p.candles)
+        volSeries.setData(p.volume)
+        mounted.forEach((m, i) => m.update(p.indicatorData[i] ?? []))
+
+        if (pdLines.high) candleSeries.removePriceLine(pdLines.high)
+        if (pdLines.low)  candleSeries.removePriceLine(pdLines.low)
+        pdLines = setPriceLines(candleSeries, p.pdHigh, p.pdLow)
+      },
+      destroy() {
+        mounted.forEach((m) => m.destroy())
+        ro.disconnect()
+        chart.remove()
+      },
     }
-
-    const rects = candles.map((c, i) => {
-      const x = i * cw + gap
-      const isGreen = c.close >= c.open
-      const color = isGreen ? '#16a34a' : '#dc2626'
-      const bodyTop = py(Math.max(c.open, c.close))
-      const bodyBot = py(Math.min(c.open, c.close))
-      const bodyH = Math.max(1, bodyBot - bodyTop)
-      const wickX = x + bw / 2
-      return `
-        <line x1="${wickX}" y1="${py(c.high)}" x2="${wickX}" y2="${py(c.low)}" stroke="${color}" stroke-width="1" opacity="0.6"/>
-        <rect x="${x}" y="${bodyTop}" width="${bw}" height="${bodyH}" fill="${color}"/>
-      `
-    }).join('')
-
-    return `<svg viewBox="0 0 ${W} ${CHART_H}" class="w-full" style="height:${CHART_H}px">${rects}</svg>`
   }
 </script>
 
-<div class="space-y-1">
+<div class="space-y-1" bind:clientWidth={containerWidth}>
   <div class="flex items-center gap-1 mb-3">
     <ToggleGroup.Root
       type="single"
@@ -95,29 +159,23 @@
         </ToggleGroup.Item>
       {/each}
     </ToggleGroup.Root>
-    <span class="ml-auto text-xs text-muted-foreground self-center">refresh in {countdown}s</span>
+    <span class="ml-auto text-xs text-muted-foreground tabular-nums">refresh in {countdown}s</span>
   </div>
 
   {#if loading}
     <Spinner />
-  {:else}
-    {#each symbols as sym}
-      {@const chart = charts[sym]}
-      <div class="mb-4">
-        <div class="text-xs text-muted-foreground font-mono mb-1">{sym}</div>
-        {#if chart?.error}
-          <div class="text-destructive text-xs">{chart.error}</div>
-        {:else if chart?.candles?.length}
-          {@html renderSVG(chart.candles)}
-          {@const last = chart.candles.at(-1)}
-          <div class="flex gap-4 text-xs text-muted-foreground font-mono mt-1">
-            <span>O {last.open.toFixed(2)}</span>
-            <span>H {last.high.toFixed(2)}</span>
-            <span>L {last.low.toFixed(2)}</span>
-            <span class="{last.close >= last.open ? 'text-success' : 'text-destructive'}">C {last.close.toFixed(2)}</span>
-          </div>
-        {/if}
+  {:else if chartData?.error}
+    <div class="text-destructive text-xs">{chartData.error}</div>
+  {:else if chartData?.candles?.length}
+    <div use:candleChart={{ candles: chartData.candles, volume: chartData.volume, indicatorData: chartData.indicatorData, pdHigh: chartData.pdHigh, pdLow: chartData.pdLow }}></div>
+    {#if chartData.last}
+      {@const last = chartData.last}
+      <div class="flex gap-4 text-xs text-muted-foreground font-mono mt-1">
+        <span>O {last.open.toFixed(2)}</span>
+        <span>H {last.high.toFixed(2)}</span>
+        <span>L {last.low.toFixed(2)}</span>
+        <span class={last.close >= last.open ? 'text-success' : 'text-destructive'}>C {last.close.toFixed(2)}</span>
       </div>
-    {/each}
+    {/if}
   {/if}
 </div>

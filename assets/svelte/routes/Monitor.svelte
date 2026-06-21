@@ -2,7 +2,8 @@
   import DashboardLayout from '../components/DashboardLayout.svelte'
   import Col from '../components/Col.svelte'
   import Widget from '../components/Widget.svelte'
-  import SentryIssues from '../widgets/SentryIssues.svelte'
+  import DataWidget from '../components/DataWidget.svelte'
+  import { sentryIssues } from '../lib/sources/sentry.js'
 
   // Format: "org/project:env1:env2,..."
   const SENTRY_PROJECTS_ENV = import.meta.env.VITE_SENTRY_PROJECTS ?? ''
@@ -24,7 +25,6 @@
 
   const entries = parseProjects(SENTRY_PROJECTS_ENV)
 
-  // Group by 2 per column
   function chunks(arr, size) {
     const result = []
     for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size))
@@ -48,9 +48,14 @@
     {#each columns as col}
       <Col span={6}>
         {#each col as { org, project, env }}
-          <Widget title="{org}/{project} · {env}" collapsible>
-            <SentryIssues {org} {project} environment={env} />
-          </Widget>
+          <DataWidget
+            title="{org}/{project} · {env}"
+            collapsible
+            display="table"
+            source={sentryIssues({ org, project, environment: env })}
+            config={{ sortable: true, defaultSort: 'count' }}
+            poll={120}
+          />
         {/each}
       </Col>
     {/each}

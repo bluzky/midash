@@ -23,8 +23,11 @@
   }
 
   fetchApps()
-  const interval = setInterval(fetchApps, 60_000)
-  $effect(() => () => clearInterval(interval))
+
+  $effect(() => {
+    const interval = setInterval(fetchApps, 60_000)
+    return () => clearInterval(interval)
+  })
 
   let grouped = $derived({
     prod: apps.filter((a) => a.name?.toLowerCase().includes('prod')),

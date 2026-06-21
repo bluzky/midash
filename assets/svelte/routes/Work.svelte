@@ -2,38 +2,51 @@
   import DashboardLayout from '../components/DashboardLayout.svelte'
   import Col from '../components/Col.svelte'
   import Widget from '../components/Widget.svelte'
-  import GithubPRs from '../widgets/GithubPRs.svelte'
+  import DataWidget from '../components/DataWidget.svelte'
   import GithubMyPRs from '../widgets/GithubMyPRs.svelte'
-  import GithubPendingReview from '../widgets/GithubPendingReview.svelte'
-  import ClickupTasks from '../widgets/ClickupTasks.svelte'
+  import { githubPRs, githubPendingReview } from '../lib/sources/github.js'
+  import { clickupTasks } from '../lib/sources/clickup.js'
 
   const REPOS = ['innoshiftco/innosync', 'innoshiftco/innoup', 'innoshiftco/innowa']
 
-  let prWidget, myPrWidget, pendingWidget, countWidget, listWidget
+  let myPrWidget
 </script>
 
 <DashboardLayout>
   <Col span={6}>
-    <Widget title="pr by dev" collapsible onRefresh={() => prWidget?.refresh()}>
-      <GithubPRs bind:this={prWidget} repos={REPOS} />
-    </Widget>
+    <DataWidget
+      title="pr by dev"
+      collapsible
+      display="table"
+      source={githubPRs({ repos: REPOS })}
+      config={{ sortable: true }}
+    />
 
     <Widget title="my prs" collapsible onRefresh={() => myPrWidget?.refresh()}>
       <GithubMyPRs bind:this={myPrWidget} repos={REPOS} />
     </Widget>
 
-    <Widget title="pending review" collapsible onRefresh={() => pendingWidget?.refresh()}>
-      <GithubPendingReview bind:this={pendingWidget} repos={REPOS} />
-    </Widget>
+    <DataWidget
+      title="pending review"
+      collapsible
+      display="list"
+      source={githubPendingReview({ repos: REPOS })}
+    />
   </Col>
 
   <Col span={6}>
-    <Widget title="task count" collapsible onRefresh={() => countWidget?.refresh()}>
-      <ClickupTasks bind:this={countWidget} mode="count" />
-    </Widget>
+    <DataWidget
+      title="task count"
+      collapsible
+      display="stat-group"
+      source={clickupTasks({ mode: 'count' })}
+    />
 
-    <Widget title="my tasks" collapsible onRefresh={() => listWidget?.refresh()}>
-      <ClickupTasks bind:this={listWidget} mode="list" />
-    </Widget>
+    <DataWidget
+      title="my tasks"
+      collapsible
+      display="list"
+      source={clickupTasks({ mode: 'list' })}
+    />
   </Col>
 </DashboardLayout>

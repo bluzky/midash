@@ -44,7 +44,8 @@ assets/svelte/
 │   └── Spinner.svelte         # Centered loading spinner
 ├── lib/
 │   ├── api.js                 # fetch wrapper with CSRF token
-│   └── router.svelte.js       # popstate-based SPA router
+│   ├── router.svelte.js       # popstate-based SPA router
+│   └── indicators/            # Reusable chart indicator modules (see below)
 ├── routes/                    # Page components (one per dashboard page)
 └── widgets/                   # Widget components (fetch from /api/*)
 ```
@@ -84,6 +85,68 @@ Widgets are Svelte components in `assets/svelte/widgets/`. Standard shape:
 1. Create `assets/svelte/widgets/MyWidget.svelte` following the widget pattern above
 2. Add a JSON endpoint in `lib/midash_web/controllers/api/` + route in `router.ex`
 3. Import and use the widget in the relevant route
+
+### CryptoChart Widget
+
+`assets/svelte/widgets/CryptoChart.svelte` renders a candlestick chart (lightweight-charts v5) for a single symbol with volume histogram and PDH/PDL price lines. It auto-refreshes every 60 seconds.
+
+**Props:**
+- `symbol` — Binance trading pair, e.g. `'ETHUSDT'` (default: `'ETHUSDT'`)
+- `indicators` — array of indicator instances (default: `[bollingerBands()]`)
+
+**Usage:**
+```svelte
+<CryptoChart symbol="ETHUSDT" />
+<CryptoChart symbol="BTCUSDT" indicators={[bollingerBands({ period: 14 })]} />
+<CryptoChart symbol="ETHUSDT" indicators={[]} />  <!-- no indicators -->
+```
+
+The Crypto route (`routes/Crypto.svelte`) renders one `Widget + CryptoChart` per symbol in a 2-per-row grid.
+
+### Chart Indicators
+
+Indicators live in `assets/svelte/lib/indicators/`. Each file exports a factory function that returns an object with three fields:
+
+```js
+{
+  warmup: number,          // extra candles to fetch for initialization
+  compute(allMapped),      // pure fn: candle array → computed data array
+  mount(chart),            // adds series to chart; returns { update(data), destroy() }
+}
+```
+
+`CryptoChart` drives the lifecycle automatically: it fetches `VISIBLE + max(warmup)` candles, calls `compute` on each refresh, and calls `mount` once on chart creation (then `update` on each refresh, `destroy` on unmount).
+
+**Available indicators** (`lib/indicators/index.js`):
+- `bollingerBands({ period = 20, mult = 2 })` — Bollinger Bands (upper/middle/lower, orange/purple/orange)
+- `ema({ period = 9, color = '#EAB308' })` — Exponential Moving Average (single line, any color)
+
+**Adding a new indicator:**
+
+1. Create `assets/svelte/lib/indicators/myIndicator.js`:
+
+```js
+import { LineSeries } from 'lightweight-charts'
+
+export function myIndicator({ period = 14 } = {}) {
+  return {
+    warmup: period,
+    compute(candles) {
+      // return array of { time, ...values }
+    },
+    mount(chart) {
+      const series = chart.addSeries(LineSeries, { color: '#fff', lineWidth: 1, lastValueVisible: false, priceLineVisible: false })
+      return {
+        update(data) { series.setData(data.map((d) => ({ time: d.time, value: d.myValue }))) },
+        destroy() { chart.removeSeries(series) },
+      }
+    },
+  }
+}
+```
+
+2. Re-export from `lib/indicators/index.js`
+3. Pass to `CryptoChart`: `indicators={[bollingerBands(), myIndicator()]}`
 
 ### API Layer
 

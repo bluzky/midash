@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [svelte()],
   resolve: {
     alias: {
+      '$app/environment': path.resolve(__dirname, 'svelte/lib/sveltekit-shim.js'),
       $lib: path.resolve(__dirname, 'svelte/lib'),
       $components: path.resolve(__dirname, 'svelte/components'),
       $widgets: path.resolve(__dirname, 'svelte/widgets'),
