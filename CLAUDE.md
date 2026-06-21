@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Midash is a personal dashboard app (glance-style) built with Phoenix 1.7 + LiveView 1.0, Tailwind CSS, and PostgreSQL.
+Midash is a personal dashboard app built with **Phoenix 1.7** (JSON API + WebSocket backend) and **Svelte 5** (SPA frontend). No LiveView — Phoenix serves JSON only; the Svelte SPA handles all routing and UI.
 
 ## Common Commands
 
@@ -12,42 +12,89 @@ Midash is a personal dashboard app (glance-style) built with Phoenix 1.7 + LiveV
 mix setup                  # Install deps, create DB, build assets
 mix phx.server             # Start dev server on localhost:4000
 iex -S mix phx.server      # Start with interactive shell
-mix test                   # Run all tests (auto-creates/migrates DB)
-mix test test/path_test.exs       # Run single test file
-mix test test/path_test.exs:42    # Run single test at line
+mix test                   # Run all tests
 mix ecto.migrate           # Run pending migrations
 mix ecto.reset             # Drop + recreate + seed DB
+npm run build              # Build frontend (run from assets/)
+npm run dev                # Frontend watch mode (run from assets/)
 ```
 
 ## Architecture
 
-### Dashboard Layout Model
+### Router
 
-Every page is a LiveView that renders a **glance-style column layout**: columns sit side-by-side (flexbox), widgets stack vertically within each column.
+Three scopes — no LiveView routes:
 
-**Flow:** Router → LiveView (sets `:dashboard` layout) → `dashboard_layout` component → `col` components → `widget` cards → `live_component` widgets
+- `/api/*` → JSON controllers in `lib/midash_web/controllers/api/`
+- `/bin/:bin_id/*` → `RequestBinPlug` (PostBin HTTP capture)
+- `/*` → `PageController.index` — serves bare HTML shell that loads the Svelte bundle
 
-### Key Components (`lib/midash_web/components/dashboard_components.ex`)
+### Frontend (Svelte 5 SPA)
 
-- `dashboard_layout` — full-page wrapper with nav + flexbox column container
-- `dashboard_nav` — top nav bar driven by a `@nav_pages` list of `%{id, label, path}`
-- `col` — vertical column, either `:small` (w-64 fixed) or `:full` (flex-1)
-- `widget` — card wrapper with optional title bar
+All UI lives in `assets/svelte/`:
+
+```
+assets/svelte/
+├── main.js                    # Entry point
+├── App.svelte                 # Root + client-side router (match() on pathname)
+├── components/
+│   ├── DashboardLayout.svelte # Nav + 12-column grid wrapper
+│   ├── Col.svelte             # Column (span prop 1–12 → col-span-{n})
+│   ├── Widget.svelte          # Card with title, collapsible, onRefresh
+│   └── Spinner.svelte         # Centered loading spinner
+├── lib/
+│   ├── api.js                 # fetch wrapper with CSRF token
+│   └── router.svelte.js       # popstate-based SPA router
+├── routes/                    # Page components (one per dashboard page)
+└── widgets/                   # Widget components (fetch from /api/*)
+```
+
+### Layout Model
+
+Every route uses: `DashboardLayout` → `Col` → `Widget` → widget component.
+
+```svelte
+<DashboardLayout>
+  <Col span={6}>
+    <Widget title="my prs" collapsible onRefresh={() => widget?.refresh()}>
+      <GithubMyPRs bind:this={widget} repos={REPOS} />
+    </Widget>
+  </Col>
+</DashboardLayout>
+```
 
 ### Widget Pattern
 
-Widgets live in `lib/midash_web/widgets/` as `live_component` modules. Self-updating widgets use this pattern:
+Widgets are Svelte components in `assets/svelte/widgets/`. Standard shape:
 
-1. Widget calls `Process.send_after(self(), {:some_tick, assigns.id}, interval)` in `update/2`
-2. The **parent LiveView** handles the tick message in `handle_info/2` and calls `send_update(WidgetModule, id: id)`
-3. `handle_info` is NOT a valid callback on `live_component` — don't use `@impl true` with it there
+- Fetch from `/api/*` via `get()` from `lib/api.js`
+- Use `$state` for `data`, `loading`, `error`
+- Show `<Spinner />` while loading (not text)
+- Export `fetch` as `refresh` so parent can trigger manual refresh
+- Use `bind:this={widgetRef}` in the route and pass `onRefresh={() => widgetRef?.refresh()}` to `Widget`
 
 ### Adding a New Page
 
-1. Create a LiveView in `lib/midash_web/live/`
-2. Add a route in `lib/midash_web/router.ex` under the browser scope
-3. Add nav entry to the `@nav_pages` module attribute (currently duplicated per LiveView)
+1. Create `assets/svelte/routes/MyPage.svelte`
+2. Add route in `App.svelte` `match()` function
+3. Add nav entry in `Nav.svelte` `PAGES` array
 
-### Visual Style
+### Adding a New Widget
 
-Dark monochrome theme: `#0d0d0d` background, `#141414` widget cards, monospace font throughout, minimal gray borders. Use Tailwind utility classes — no custom CSS.
+1. Create `assets/svelte/widgets/MyWidget.svelte` following the widget pattern above
+2. Add a JSON endpoint in `lib/midash_web/controllers/api/` + route in `router.ex`
+3. Import and use the widget in the relevant route
+
+### API Layer
+
+Use `get`, `post`, `del` from `assets/svelte/lib/api.js`. CSRF token is read from the Phoenix-injected meta tag automatically.
+
+## Styling
+
+See **`DESIGN.md`** for the full design system — colors, typography, spacing, border radius, and component guidelines. Always consult it before making visual decisions.
+
+Key rules:
+- **Tailwind CSS** + **Bits UI** for accessible components (Tabs, Collapsible, ToggleGroup)
+- Border radius: always use `rounded-lg` / `rounded-md` / `rounded-sm` (map to `var(--radius)` CSS variable) — never bare `rounded`
+- Font sizes: `text-sm` for primary content labels, `text-xs` for metadata (timestamps, counts, secondary info)
+- Loading states: `<Spinner />` component, never "fetching..." text

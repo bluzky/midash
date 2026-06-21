@@ -10,7 +10,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: '#FD4F00',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -43,14 +42,16 @@ export default {
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
         info: 'hsl(var(--info))',
+        neutral: 'hsl(var(--neutral))',
       },
       fontFamily: {
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+        sans: ['Roboto', 'system-ui', 'sans-serif'],
+        mono: ['Roboto Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: 'var(--radius)',           /* 12px — cards, panels */
+        md: 'calc(var(--radius) - 2px)', /* 10px — buttons, inputs */
+        sm: 'calc(var(--radius) - 4px)', /* 8px — small badges */
       },
     },
   },

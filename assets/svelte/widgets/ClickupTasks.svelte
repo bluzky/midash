@@ -66,9 +66,9 @@
       <a
         href={clickupUrl(s.key)}
         target="_blank"
-        class="rounded-lg border border-border p-2 hover:border-foreground transition-colors block text-center"
+        class="rounded-lg border border-border p-2 hover:shadow-[0_4px_16px_rgba(28,25,23,0.06)] transition-all block text-center"
       >
-        <div class="text-sm font-mono leading-tight truncate uppercase" style="color: {s.color}">{s.label}</div>
+        <div class="text-sm leading-tight truncate uppercase font-medium" style="color: {s.color}">{s.label}</div>
         <div class="text-xl font-mono tabular-nums text-foreground mt-1">{countByStatus(s.key)}</div>
       </a>
     {/each}
@@ -79,24 +79,19 @@
       {@const filtered = tasksByStatus(s.key)}
       {#if filtered.length > 0}
         <div>
-          <div class="text-sm font-mono uppercase mb-2" style="color: {s.color}">{s.label} ({filtered.length})</div>
+          <div class="text-sm font-medium uppercase mb-2" style="color: {s.color}">{s.label} ({filtered.length})</div>
           <div class="space-y-2">
             {#each filtered as task}
-              <a
-                href={task.url}
-                target="_blank"
-                class="block border-l-2 border-border pl-3 hover:border-foreground transition-colors"
-              >
-                <div class="text-sm text-foreground">{task.name}</div>
-                <div class="flex gap-3 text-xs text-muted-foreground mt-0.5">
+              <div class="border-l-2 border-border pl-3">
+                <a href={task.url} target="_blank" class="text-sm text-primary hover:underline block mb-1">
+                  {task.name}
+                </a>
+                <div class="flex gap-3 text-xs text-muted-foreground">
                   {#if task.due_date}
                     <span class="{formatDue(task.due_date) === 'overdue' ? 'text-destructive' : ''}">{formatDue(task.due_date)}</span>
                   {/if}
-                  {#if task.list?.name}
-                    <span>{task.list.name}</span>
-                  {/if}
                 </div>
-              </a>
+              </div>
             {/each}
           </div>
         </div>

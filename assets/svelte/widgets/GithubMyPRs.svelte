@@ -48,8 +48,8 @@
       <Tabs.Trigger
         value={repo}
         class="px-3 py-1 text-sm font-mono transition-colors outline-none
-          data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-foreground data-[state=active]:-mb-px
-          data-[state=inactive]:text-muted-foreground hover:text-foreground"
+          data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:-mb-px
+          data-[state=inactive]:text-muted-foreground hover:text-foreground hover:bg-secondary rounded-t-md"
       >
         {repoName(repo)}
       </Tabs.Trigger>
@@ -72,7 +72,7 @@
           <div class="space-y-3">
             {#each d.prs as pr}
               <div class="border-l-2 border-border pl-3">
-                <a href={pr.html_url} target="_blank" class="text-sm text-info hover:underline block mb-1">
+                <a href={pr.html_url} target="_blank" class="text-sm text-primary hover:underline block mb-1">
                   <span class="text-muted-foreground">#{pr.number}</span> {pr.title}
                 </a>
                 <div class="flex gap-3 text-xs text-muted-foreground">

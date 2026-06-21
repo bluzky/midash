@@ -24,9 +24,9 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">← toolkit</button>
+      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
       <span class="text-xs text-muted-foreground">/</span>
-      <span class="text-xs text-foreground font-mono">barcode generator</span>
+      <span class="text-xs text-foreground">barcode generator</span>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -37,20 +37,20 @@
           bind:value={input}
           rows="6"
           placeholder="ABC-001&#10;ABC-002&#10;ABC-003"
-          class="w-full rounded-lg border border-border bg-background p-3 font-mono text-sm text-foreground resize-y focus:outline-none focus:ring-1 focus:ring-ring"
+          class="w-full rounded-md border border-border bg-card p-3 font-mono text-sm text-foreground resize-y focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
         ></textarea>
         <div class="flex items-center gap-3">
           <button
             onclick={generate}
             disabled={loading}
-            class="px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-xs font-mono hover:bg-secondary/80 transition-colors disabled:opacity-50"
+            class="btn-primary px-4 py-2 text-xs"
           >
             {loading ? 'generating...' : 'generate'}
           </button>
           {#if barcodes.length}
             <button
               onclick={() => window.print()}
-              class="px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-xs font-mono hover:bg-secondary/80 transition-colors"
+              class="px-4 py-2 rounded-md border border-border text-foreground text-xs font-medium hover:bg-secondary transition-colors"
             >
               print
             </button>

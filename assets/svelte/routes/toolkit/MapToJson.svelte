@@ -38,9 +38,9 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">← toolkit</button>
+      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
       <span class="text-xs text-muted-foreground">/</span>
-      <span class="text-xs text-foreground font-mono">map → json</span>
+      <span class="text-xs text-foreground">map → json</span>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -50,7 +50,7 @@
           <textarea
             id="map-input"
             bind:value={input}
-            class="h-96 w-full rounded-lg border border-border bg-background p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            class="h-96 w-full rounded-md border border-border bg-card p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
             placeholder={'%{key: "value"}'}
             spellcheck="false"
           ></textarea>
@@ -65,14 +65,14 @@
         <button
           onclick={convert}
           disabled={loading}
-          class="px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-xs font-mono hover:bg-secondary/80 transition-colors disabled:opacity-50"
+          class="btn-primary px-4 py-2 text-xs"
         >
           {loading ? 'converting...' : 'convert'}
         </button>
         {#if output}
           <button
             onclick={copy}
-            class="px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-xs font-mono hover:bg-secondary/80 transition-colors"
+            class="px-4 py-2 rounded-md border border-border text-foreground text-xs font-medium hover:bg-secondary transition-colors"
           >
             {copied ? 'copied!' : 'copy'}
           </button>

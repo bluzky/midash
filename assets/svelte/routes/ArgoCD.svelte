@@ -2,6 +2,7 @@
   import DashboardLayout from '../components/DashboardLayout.svelte'
   import Col from '../components/Col.svelte'
   import Widget from '../components/Widget.svelte'
+  import Spinner from '../components/Spinner.svelte'
   import { get } from '../lib/api.js'
 
   let apps = $state([])
@@ -45,83 +46,45 @@
   }
 </script>
 
-<DashboardLayout>
+{#snippet appList(list)}
   {#if loading}
-    <Col span={12}>
-      <div class="text-muted-foreground text-sm p-4">loading applications...</div>
-    </Col>
+    <Spinner />
   {:else if error}
-    <Col span={12}>
-      <div class="text-destructive text-sm p-4">{error}</div>
-    </Col>
+    <div class="text-destructive text-sm px-1">{error}</div>
+  {:else if list.length === 0}
+    <div class="text-muted-foreground text-sm px-1">no apps</div>
   {:else}
-    <Col span={4}>
-      <div class="text-xs text-destructive uppercase tracking-widest mb-3 px-1">production</div>
-      {#if grouped.prod.length === 0}
-        <div class="text-muted-foreground text-sm px-1">no apps</div>
-      {:else}
-        {#each grouped.prod as app}
-          <Widget title={app.name} collapsible headerClass="text-destructive">
-            <div class="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-              <span>app: <span class="{healthColor(app.health_status)}">{app.health_status}</span></span>
-              <span>·</span>
-              <span>sync: <span class="{syncColor(app.sync_status)}">{app.sync_status}</span></span>
-            </div>
-            {#each app.resources ?? [] as r}
-              <div class="flex items-center justify-between py-1 text-sm font-mono border-t border-border">
-                <span class="truncate text-foreground">{r.name}</span>
-                <span class="{healthColor(r.health_status)} shrink-0 ml-2 text-xs">● {r.health_status}</span>
-              </div>
-            {/each}
-          </Widget>
+    {#each list as app}
+      <Widget title={app.name} collapsible>
+        <div class="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+          <span>app: <span class="{healthColor(app.health_status)}">{app.health_status}</span></span>
+          <span>·</span>
+          <span>sync: <span class="{syncColor(app.sync_status)}">{app.sync_status}</span></span>
+        </div>
+        {#each app.resources ?? [] as r}
+          <div class="flex items-center justify-between py-1 text-sm font-mono border-t border-border">
+            <span class="truncate text-foreground">{r.name}</span>
+            <span class="{healthColor(r.health_status)} shrink-0 ml-2 text-xs">● {r.health_status}</span>
+          </div>
         {/each}
-      {/if}
-    </Col>
-
-    <Col span={4}>
-      <div class="text-xs text-yellow-400 uppercase tracking-widest mb-3 px-1">staging</div>
-      {#if grouped.stg.length === 0}
-        <div class="text-muted-foreground text-sm px-1">no apps</div>
-      {:else}
-        {#each grouped.stg as app}
-          <Widget title={app.name} collapsible headerClass="text-yellow-400">
-            <div class="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-              <span>app: <span class="{healthColor(app.health_status)}">{app.health_status}</span></span>
-              <span>·</span>
-              <span>sync: <span class="{syncColor(app.sync_status)}">{app.sync_status}</span></span>
-            </div>
-            {#each app.resources ?? [] as r}
-              <div class="flex items-center justify-between py-1 text-sm font-mono border-t border-border">
-                <span class="truncate text-foreground">{r.name}</span>
-                <span class="{healthColor(r.health_status)} shrink-0 ml-2 text-xs">● {r.health_status}</span>
-              </div>
-            {/each}
-          </Widget>
-        {/each}
-      {/if}
-    </Col>
-
-    <Col span={4}>
-      <div class="text-xs text-muted-foreground uppercase tracking-widest mb-3 px-1">dev / other</div>
-      {#if grouped.other.length === 0}
-        <div class="text-muted-foreground text-sm px-1">no apps</div>
-      {:else}
-        {#each grouped.other as app}
-          <Widget title={app.name} collapsible>
-            <div class="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-              <span>app: <span class="{healthColor(app.health_status)}">{app.health_status}</span></span>
-              <span>·</span>
-              <span>sync: <span class="{syncColor(app.sync_status)}">{app.sync_status}</span></span>
-            </div>
-            {#each app.resources ?? [] as r}
-              <div class="flex items-center justify-between py-1 text-sm font-mono border-t border-border">
-                <span class="truncate text-foreground">{r.name}</span>
-                <span class="{healthColor(r.health_status)} shrink-0 ml-2 text-xs">● {r.health_status}</span>
-              </div>
-            {/each}
-          </Widget>
-        {/each}
-      {/if}
-    </Col>
+      </Widget>
+    {/each}
   {/if}
+{/snippet}
+
+<DashboardLayout>
+  <Col span={4}>
+    <div class="text-xs text-destructive uppercase tracking-widest mb-3 px-1">production</div>
+    {@render appList(grouped.prod)}
+  </Col>
+
+  <Col span={4}>
+    <div class="text-xs text-yellow-400 uppercase tracking-widest mb-3 px-1">staging</div>
+    {@render appList(grouped.stg)}
+  </Col>
+
+  <Col span={4}>
+    <div class="text-xs text-muted-foreground uppercase tracking-widest mb-3 px-1">dev / other</div>
+    {@render appList(grouped.other)}
+  </Col>
 </DashboardLayout>

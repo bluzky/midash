@@ -41,7 +41,7 @@
     {#each repos as repo}
       {@const d = reposData[repo]}
       <div class="flex flex-col gap-1">
-        <span class="text-sm text-muted-foreground font-mono">{repoName(repo)}</span>
+        <span class="text-sm text-muted-foreground">{repoName(repo)}</span>
         {#if !d}
           <div class="text-muted-foreground text-sm">—</div>
         {:else if d.error}

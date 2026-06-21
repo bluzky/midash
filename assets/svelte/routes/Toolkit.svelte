@@ -46,7 +46,7 @@
       autofocus
       autocomplete="off"
       onkeydown={handleKeydown}
-      class="w-full rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+      class="w-full rounded-md border border-border bg-card px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
     />
 
     <div class="grid grid-cols-3 gap-3">
@@ -54,11 +54,11 @@
         <a
           href={tool.path}
           onclick={(e) => handleNav(e, tool.path)}
-          class="flex items-start gap-3 rounded-lg border border-border bg-card p-4 hover:bg-secondary/50 transition-colors"
+          class="flex items-start gap-3 rounded-lg border border-border bg-card p-4 hover:bg-secondary transition-all hover:shadow-[0_4px_16px_rgba(28,25,23,0.06)]"
         >
-          <tool.icon class="w-8 h-8 text-muted-foreground shrink-0 mt-0.5" />
+          <tool.icon class="w-8 h-8 text-primary shrink-0 mt-0.5" />
           <div class="flex flex-col gap-1">
-            <span class="text-sm font-mono text-foreground">{tool.label}</span>
+            <span class="text-sm font-medium text-foreground">{tool.label}</span>
             <span class="text-xs text-muted-foreground">{tool.description}</span>
           </div>
         </a>

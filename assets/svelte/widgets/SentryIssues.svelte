@@ -60,7 +60,7 @@
       id="sentry-sort-{org}-{project}"
       bind:value={sort}
       onchange={fetch}
-      class="bg-secondary border border-border rounded-lg text-sm px-2 py-1 text-foreground cursor-pointer"
+      class="bg-card border border-border rounded-md text-sm px-2 py-1 text-foreground cursor-pointer focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
     >
       {#each SORT_OPTIONS as opt}
         <option value={opt.value}>{opt.label}</option>
@@ -98,7 +98,7 @@
               {fmtLastSeen(issue.lastSeen)}
             </td>
             <td class="py-1 px-0 text-right w-20 shrink-0">
-              <span class="bg-secondary/50 px-2 py-0.5 rounded-lg text-sm font-mono font-semibold tabular-nums inline-block {hot ? 'text-destructive' : 'text-foreground'}">
+              <span class="bg-secondary/50 px-2 py-0.5 rounded-full text-sm font-mono font-medium tabular-nums inline-block {hot ? 'text-destructive' : 'text-foreground'}">
                 {fmtCount(issue.count)}
               </span>
             </td>

@@ -2,93 +2,181 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "../node_modules/prismjs/themes/prism-tomorrow.css";
-
-/* This file is for your main application CSS */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap');
 
 @layer base {
+
+  /* ── 1. Red Graphite (default / fallback) ─────────────────────────── */
   :root,
-  [data-theme="light"] {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+  [data-theme="red-graphite"] {
+    --background: 0 0% 96%;          /* #F5F5F5 soft grey page */
+    --foreground: 0 0% 17%;          /* #2B2B2B deep charcoal */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card: 0 0% 100%;               /* #FFFFFF pure white cards */
+    --card-foreground: 0 0% 17%;
 
-    --primary: 18 98% 50%;
+    --primary: 3 71% 58%;            /* #E04E46 Bear crimson */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
+    --secondary: 0 0% 92%;           /* #EAEAEA tag / hover fill */
+    --secondary-foreground: 0 0% 17%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 59%;    /* #969696 medium grey */
 
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
+    --accent: 3 71% 58%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 3 71% 58%;
+
+    /* State colors — calibrated away from the crimson primary */
+    --destructive:          0 85% 42%;   /* #C41C12 deep alarm red */
     --destructive-foreground: 0 0% 100%;
+    --warning:             35 90% 44%;   /* #D98608 amber */
+    --info:               210 75% 48%;   /* #1B78CC steel blue */
+    --success:            140 60% 33%;   /* #218C52 forest green */
+    --neutral:              0  0% 52%;   /* #858585 medium grey */
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 18 98% 50%;
-
-    --success: 160 84% 39%;
-    --warning: 38 92% 50%;
-    --info: 217 91% 60%;
-
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
-  .dark,
-  [data-theme="dark"] {
-    --background: 0 0% 5%;
-    --foreground: 220 9% 82%;
+  /* ── 2. Solarized Slate ───────────────────────────────────────────── */
+  [data-theme="solarized-slate"] {
+    --background: 44 7% 91%;         /* #F0ECE1 muted oat page */
+    --foreground: 200 4% 19%;        /* #2D3133 slate black */
 
-    --card: 0 0% 8%;
-    --card-foreground: 220 9% 82%;
+    --card: 43 30% 98%;              /* #FBF9F4 warm ivory cards */
+    --card-foreground: 200 4% 19%;
 
-    --primary: 18 98% 50%;
+    --primary: 188 53% 35%;          /* #2A7B88 deep teal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 220 9% 82%;
+    --secondary: 44 10% 88%;         /* #EBE6D8 soft tan hover */
+    --secondary-foreground: 200 4% 19%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 44 7% 91%;
+    --muted-foreground: 45 6% 61%;   /* #A19E95 warm muted grey */
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 220 9% 82%;
+    --accent: 188 53% 35%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --border: 44 8% 84%;
+    --input: 44 8% 84%;
+    --ring: 188 53% 35%;
+
+    /* State colors — warm-tinted to complement the oat palette */
+    --destructive:          5 75% 48%;   /* #D53828 warm red */
     --destructive-foreground: 0 0% 100%;
+    --warning:             35 88% 42%;   /* #CC8000 warm amber */
+    --info:               200 62% 40%;   /* #246FA0 warm steel blue */
+    --success:            145 55% 35%;   /* #288557 warm green */
+    --neutral:             30  8% 52%;   /* #8C847B warm stone */
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 18 98% 50%;
-
-    --success: 160 84% 39%;
-    --warning: 38 92% 50%;
-    --info: 217 91% 60%;
-
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
+  /* ── 3. Dark Graphite ─────────────────────────────────────────────── */
+  [data-theme="dark-graphite"],
+  .dark {
+    --background: 240 2% 9%;         /* #16161A near-black sidebar */
+    --foreground: 240 2% 90%;        /* #E3E3E6 soft off-white */
+
+    --card: 240 3% 13%;              /* #1E1E24 deep charcoal cards */
+    --card-foreground: 240 2% 90%;
+
+    --primary: 4 85% 67%;            /* #F26C63 vibrant coral */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 223 4% 19%;         /* #2D2F34 dark badge / hover */
+    --secondary-foreground: 240 2% 90%;
+
+    --muted: 223 4% 19%;
+    --muted-foreground: 240 5% 62%;  /* #999AA6 readable grey on dark */
+
+    --accent: 4 85% 67%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 240 3% 22%;
+    --input: 240 3% 22%;
+    --ring: 4 85% 67%;
+
+    /* State colors — brightened for dark bg, distinct from coral primary */
+    --destructive:          0 80% 58%;   /* #EB3333 bright alarm red */
+    --destructive-foreground: 0 0% 100%;
+    --warning:             38 95% 55%;   /* #F0A020 bright amber */
+    --info:               208 85% 62%;   /* #3399EE bright blue */
+    --success:            145 60% 47%;   /* #2BAB65 bright green */
+    --neutral:            240  5% 56%;   /* #878896 cool blue-grey */
+
+    --radius: 0.75rem;
+  }
+
+  /* ── 4. Nordic Forest ─────────────────────────────────────────────── */
+  [data-theme="nordic-forest"] {
+    --background: 180 3% 93%;        /* #E9EFEF pale ice-blue page */
+    --foreground: 188 9% 13%;        /* #1A282A deep forest-slate */
+
+    --card: 160 5% 97%;              /* #F4F7F6 cool mint-white cards */
+    --card-foreground: 188 9% 13%;
+
+    --primary: 169 52% 36%;          /* #2C8A79 pine green */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 174 5% 88%;         /* #DCE6E5 desaturated green-grey hover */
+    --secondary-foreground: 188 9% 13%;
+
+    --muted: 180 3% 93%;
+    --muted-foreground: 180 7% 58%;  /* #8B9A9A cool sage grey */
+
+    --accent: 169 52% 36%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 174 5% 84%;
+    --input: 174 5% 84%;
+    --ring: 169 52% 36%;
+
+    /* State colors — cool-toned; success distinct from pine-green primary */
+    --destructive:          0 72% 48%;   /* #CC2727 clear red */
+    --destructive-foreground: 0 0% 100%;
+    --warning:             40 88% 44%;   /* #C88800 gold-amber */
+    --info:               205 68% 44%;   /* #1E7AB5 cool blue */
+    --success:            130 52% 36%;   /* #2D8A44 medium green (≠ teal primary) */
+    --neutral:            180  6% 52%;   /* #7E8C8C cool sage */
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer components {
+  /* Theme-aware primary button — glow shadow picks up active --primary */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground rounded-md font-medium transition-all disabled:opacity-50;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: hsl(var(--primary) / 0.9);
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+  }
+
+  /* Theme-aware card hover shadow */
+  .widget-card {
+    @apply rounded-lg border border-border bg-card transition-shadow;
+  }
+  .widget-card:hover {
+    box-shadow: 0 4px 16px hsl(var(--foreground) / 0.06);
+  }
 }
 
 body {
-  @apply bg-background text-foreground font-mono antialiased;
+  @apply bg-background text-foreground font-sans antialiased;
 }
 
 @media print {
-  body * {
-    visibility: hidden;
-  }
+  body * { visibility: hidden; }
 
   #barcode-grid,
-  #barcode-grid * {
-    visibility: visible;
-  }
+  #barcode-grid * { visibility: visible; }
 
   #barcode-grid {
     position: fixed;
@@ -99,6 +187,6 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     padding: 0.5rem;
-    background: white;
+    background: #FAF8F3;
   }
 }

@@ -107,7 +107,7 @@
   }
 
   function methodColor(m) {
-    const map = { GET: 'bg-blue-500/20 text-blue-400', POST: 'bg-green-500/20 text-green-400', PUT: 'bg-yellow-500/20 text-yellow-400', PATCH: 'bg-orange-500/20 text-orange-400', DELETE: 'bg-red-500/20 text-red-400' }
+    const map = { GET: 'bg-primary/10 text-primary', POST: 'bg-success/10 text-success', PUT: 'bg-warning/10 text-warning', PATCH: 'bg-warning/10 text-warning', DELETE: 'bg-destructive/10 text-destructive' }
     return map[m] ?? 'bg-muted text-muted-foreground'
   }
 
@@ -130,9 +130,9 @@
     {#if !binId}
       <!-- LIST PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">← toolkit</button>
+        <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
         <span class="text-xs text-muted-foreground">/</span>
-        <span class="text-xs text-foreground font-mono">postbin</span>
+        <span class="text-xs text-foreground">postbin</span>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -140,7 +140,7 @@
           <p class="text-xs text-muted-foreground">create a bin, send HTTP requests to its URL, inspect them here</p>
           <button
             onclick={createBin}
-            class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors"
           >
             + new bin
           </button>
@@ -188,7 +188,7 @@
     {:else}
       <!-- BIN DETAIL PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit/postbin')} class="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">← postbin</button>
+        <button onclick={() => navigate('/toolkit/postbin')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← postbin</button>
         <span class="text-xs text-muted-foreground">/</span>
         <span class="text-xs text-foreground font-mono">{binId}</span>
         <div class="ml-auto flex items-center gap-2">
@@ -217,9 +217,9 @@
                   onclick={() => { selectedReq = req; activeTab = 'body' }}
                   class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-secondary/50 transition-colors {selectedReq?.id === req.id ? 'bg-secondary' : ''}"
                 >
-                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-lg shrink-0 {methodColor(req.method)}">{req.method}</span>
+                  <span class="text-xs font-bold px-1.5 py-0.5 rounded-full shrink-0 {methodColor(req.method)}">{req.method}</span>
                   <span class="text-xs font-mono text-foreground truncate flex-1">{req.path}</span>
-                  <span class="text-[10px] text-muted-foreground shrink-0">{formatTime(req.inserted_at)}</span>
+                  <span class="text-xs text-muted-foreground shrink-0">{formatTime(req.inserted_at)}</span>
                 </button>
               {/each}
             </div>
@@ -234,16 +234,16 @@
           {:else}
             <Tabs.Root bind:value={activeTab} class="flex-1 flex flex-col overflow-hidden">
               <div class="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
-                <span class="text-xs font-bold px-2 py-1 rounded-lg {methodColor(selectedReq.method)}">{selectedReq.method}</span>
+                <span class="text-xs font-bold px-2 py-1 rounded-full {methodColor(selectedReq.method)}">{selectedReq.method}</span>
                 <span class="text-sm font-mono text-foreground">{selectedReq.path}</span>
-                <span class="ml-auto text-[10px] text-muted-foreground">{formatTime(selectedReq.inserted_at)}</span>
+                <span class="ml-auto text-xs text-muted-foreground">{formatTime(selectedReq.inserted_at)}</span>
               </div>
 
               <Tabs.List class="flex gap-1 border-b border-border px-4 shrink-0">
                 <Tabs.Trigger
                   value="body"
                   class="px-3 py-2 text-xs border-b-2 -mb-px transition-colors outline-none
-                    data-[state=active]:border-foreground data-[state=active]:text-foreground
+                    data-[state=active]:border-primary data-[state=active]:text-primary
                     data-[state=inactive]:border-transparent data-[state=inactive]:text-muted-foreground hover:text-foreground"
                 >
                   body
@@ -251,18 +251,18 @@
                 <Tabs.Trigger
                   value="headers"
                   class="px-3 py-2 text-xs border-b-2 -mb-px transition-colors outline-none
-                    data-[state=active]:border-foreground data-[state=active]:text-foreground
+                    data-[state=active]:border-primary data-[state=active]:text-primary
                     data-[state=inactive]:border-transparent data-[state=inactive]:text-muted-foreground hover:text-foreground"
                 >
-                  headers <span class="ml-1 text-[10px] opacity-60">({Object.keys(selectedReq.headers ?? {}).length})</span>
+                  headers <span class="ml-1 text-xs opacity-60">({Object.keys(selectedReq.headers ?? {}).length})</span>
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="query"
                   class="px-3 py-2 text-xs border-b-2 -mb-px transition-colors outline-none
-                    data-[state=active]:border-foreground data-[state=active]:text-foreground
+                    data-[state=active]:border-primary data-[state=active]:text-primary
                     data-[state=inactive]:border-transparent data-[state=inactive]:text-muted-foreground hover:text-foreground"
                 >
-                  query <span class="ml-1 text-[10px] opacity-60">({Object.keys(selectedReq.query ?? {}).length})</span>
+                  query <span class="ml-1 text-xs opacity-60">({Object.keys(selectedReq.query ?? {}).length})</span>
                 </Tabs.Trigger>
               </Tabs.List>
 
@@ -272,8 +272,8 @@
                   {#if !body}
                     <div class="text-xs text-muted-foreground">empty body</div>
                   {:else}
-                    <div class="mb-2 text-[10px] text-muted-foreground font-mono">content-type: {selectedReq.content_type}</div>
-                    <pre class="rounded-lg border border-border bg-background p-4 text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all">{body}</pre>
+                    <div class="mb-2 text-xs text-muted-foreground font-mono">content-type: {selectedReq.content_type}</div>
+                    <pre class="rounded-md border border-border bg-card p-4 text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all">{body}</pre>
                   {/if}
                 </Tabs.Content>
                 <Tabs.Content value="headers">

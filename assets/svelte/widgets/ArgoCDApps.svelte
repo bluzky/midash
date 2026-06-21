@@ -25,15 +25,15 @@
   $effect(() => () => clearInterval(interval))
 
   function healthColor(s) {
-    if (s === 'Healthy') return 'text-green-400'
-    if (s === 'Degraded') return 'text-red-400'
-    if (s === 'Progressing') return 'text-yellow-400'
+    if (s === 'Healthy') return 'text-success'
+    if (s === 'Degraded') return 'text-destructive'
+    if (s === 'Progressing') return 'text-warning'
     return 'text-muted-foreground'
   }
 
   function syncColor(s) {
-    if (s === 'Synced') return 'text-green-400'
-    if (s === 'OutOfSync') return 'text-yellow-400'
+    if (s === 'Synced') return 'text-success'
+    if (s === 'OutOfSync') return 'text-warning'
     return 'text-muted-foreground'
   }
 </script>

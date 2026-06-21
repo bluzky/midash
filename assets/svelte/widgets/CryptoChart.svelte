@@ -61,7 +61,7 @@
     const rects = candles.map((c, i) => {
       const x = i * cw + gap
       const isGreen = c.close >= c.open
-      const color = isGreen ? '#4ade80' : '#f87171'
+      const color = isGreen ? '#16a34a' : '#dc2626'
       const bodyTop = py(Math.max(c.open, c.close))
       const bodyBot = py(Math.min(c.open, c.close))
       const bodyH = Math.max(1, bodyBot - bodyTop)
@@ -87,15 +87,15 @@
       {#each INTERVALS as iv}
         <ToggleGroup.Item
           value={iv.key}
-          class="px-2 py-0.5 text-xs rounded-lg border transition-colors outline-none
-            data-[state=on]:border-foreground data-[state=on]:text-foreground data-[state=on]:bg-secondary
-            data-[state=off]:border-border data-[state=off]:text-muted-foreground hover:text-foreground"
+          class="px-2 py-0.5 text-xs rounded-md border transition-colors outline-none
+            data-[state=on]:border-primary data-[state=on]:text-primary data-[state=on]:bg-primary/10
+            data-[state=off]:border-border data-[state=off]:text-muted-foreground hover:text-foreground hover:bg-secondary"
         >
           {iv.label}
         </ToggleGroup.Item>
       {/each}
     </ToggleGroup.Root>
-    <span class="ml-auto text-[10px] text-muted-foreground self-center">refresh in {countdown}s</span>
+    <span class="ml-auto text-xs text-muted-foreground self-center">refresh in {countdown}s</span>
   </div>
 
   {#if loading}
@@ -110,11 +110,11 @@
         {:else if chart?.candles?.length}
           {@html renderSVG(chart.candles)}
           {@const last = chart.candles.at(-1)}
-          <div class="flex gap-4 text-[10px] text-muted-foreground font-mono mt-1">
+          <div class="flex gap-4 text-xs text-muted-foreground font-mono mt-1">
             <span>O {last.open.toFixed(2)}</span>
             <span>H {last.high.toFixed(2)}</span>
             <span>L {last.low.toFixed(2)}</span>
-            <span class="{last.close >= last.open ? 'text-green-400' : 'text-red-400'}">C {last.close.toFixed(2)}</span>
+            <span class="{last.close >= last.open ? 'text-success' : 'text-destructive'}">C {last.close.toFixed(2)}</span>
           </div>
         {/if}
       </div>

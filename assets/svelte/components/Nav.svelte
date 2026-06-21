@@ -1,12 +1,11 @@
 <script>
-  import { Sun, Moon } from '@lucide/svelte'
+  import { SunMoon } from '@lucide/svelte'
   import { navigate, router } from '../lib/router.svelte.js'
-  import { applyTheme, getStoredTheme } from '../lib/themes.js'
+  import { applyTheme, getStoredTheme, THEMES } from '../lib/themes.js'
 
   let currentTheme = $state(getStoredTheme())
 
   const pages = [
-    { id: 'home', label: 'home', path: '/' },
     { id: 'work', label: 'work', path: '/work' },
     { id: 'monitor', label: 'monitor', path: '/monitor' },
     { id: 'argocd', label: 'argocd', path: '/argocd' },
@@ -15,8 +14,7 @@
   ]
 
   function isActive(path) {
-    if (path === '/') return router.path === '/'
-    return router.path.startsWith(path)
+    return router.path === path || router.path.startsWith(path + '/')
   }
 
   function handleNav(e, path) {
@@ -24,37 +22,49 @@
     navigate(path)
   }
 
-  function toggleTheme() {
-    const next = currentTheme === 'dark' ? 'light' : 'dark'
-    applyTheme(next)
-    currentTheme = next
+  function handleTheme(id) {
+    applyTheme(id)
+    currentTheme = id
   }
 </script>
 
-<nav class="fixed top-0 inset-x-0 z-50 flex items-center gap-1 border-b border-border bg-background px-4 py-2">
+<nav class="fixed top-0 inset-x-0 z-50 flex items-center gap-1 border-b border-border bg-background/90 backdrop-blur px-4 py-2">
   <img src="/images/logo.svg" alt="midash" class="h-5 mr-2" />
 
   {#each pages as page}
     <a
       href={page.path}
       onclick={(e) => handleNav(e, page.path)}
-      class="px-3 py-1.5 text-sm rounded-md transition-colors {isActive(page.path)
-        ? 'bg-secondary text-foreground'
-        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}"
+      class="px-3 py-1.5 text-sm rounded-md transition-colors font-medium {isActive(page.path)
+        ? 'bg-primary/10 text-primary'
+        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}"
     >
       {page.label}
     </a>
   {/each}
 
-  <button
-    onclick={toggleTheme}
-    class="ml-auto rounded-sm p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-    title="toggle theme"
-  >
-    {#if currentTheme === 'dark'}
-      <Sun class="w-4 h-4" />
-    {:else}
-      <Moon class="w-4 h-4" />
-    {/if}
-  </button>
+  <div class="ml-auto flex items-center gap-2 pl-3">
+    {#each THEMES as theme}
+      {#if theme.id === 'system'}
+        <button
+          onclick={() => handleTheme('system')}
+          title="System"
+          class="rounded-md p-0.5 transition-all duration-150 {currentTheme === 'system'
+            ? 'text-primary'
+            : 'text-muted-foreground opacity-50 hover:opacity-100'}"
+        >
+          <SunMoon class="w-3.5 h-3.5" />
+        </button>
+      {:else}
+        <button
+          onclick={() => handleTheme(theme.id)}
+          title={theme.label}
+          class="w-3.5 h-3.5 rounded-full transition-all duration-150 {currentTheme === theme.id
+            ? 'ring-2 ring-offset-2 ring-offset-background ring-primary scale-125'
+            : 'opacity-50 hover:opacity-100 hover:scale-110'}"
+          style="background-color: {theme.color}"
+        />
+      {/if}
+    {/each}
+  </div>
 </nav>

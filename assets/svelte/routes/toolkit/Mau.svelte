@@ -32,9 +32,9 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono">← toolkit</button>
+      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
       <span class="text-xs text-muted-foreground">/</span>
-      <span class="text-xs text-foreground font-mono">mau template</span>
+      <span class="text-xs text-foreground">mau template</span>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -44,7 +44,7 @@
           <textarea
             id="mau-template"
             bind:value={template}
-            class="h-72 w-full rounded-lg border border-border bg-background p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            class="h-72 w-full rounded-md border border-border bg-card p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
             placeholder="Enter Mau template..."
             spellcheck="false"
           ></textarea>
@@ -54,7 +54,7 @@
           <textarea
             id="mau-params"
             bind:value={params}
-            class="h-72 w-full rounded-lg border border-border bg-background p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            class="h-72 w-full rounded-md border border-border bg-card p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
             placeholder={'{"key": "value"}'}
             spellcheck="false"
           ></textarea>
@@ -64,7 +64,7 @@
       <button
         onclick={render}
         disabled={loading}
-        class="self-start px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-xs font-mono hover:bg-secondary/80 transition-colors disabled:opacity-50"
+        class="btn-primary self-start px-4 py-2 text-xs"
       >
         {loading ? 'rendering...' : 'render'}
       </button>
@@ -72,7 +72,7 @@
       {#if output !== null || error !== null}
         <div class="flex flex-col gap-1">
           <span class="text-xs text-muted-foreground uppercase tracking-widest">Output</span>
-          <pre class="rounded-lg border border-border p-3 text-xs font-mono overflow-auto whitespace-pre-wrap {error ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-green-400'}">{error ?? output}</pre>
+          <pre class="rounded-md border border-border p-3 text-xs font-mono overflow-auto whitespace-pre-wrap {error ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-success'}">{error ?? output}</pre>
         </div>
       {/if}
     </div>

@@ -1,6 +1,5 @@
 <script>
   import { router } from './lib/router.svelte.js'
-  import Home from './routes/Home.svelte'
   import Work from './routes/Work.svelte'
   import Crypto from './routes/Crypto.svelte'
   import Monitor from './routes/Monitor.svelte'
@@ -13,9 +12,7 @@
   import MapToJson from './routes/toolkit/MapToJson.svelte'
 </script>
 
-{#if router.path === '/'}
-  <Home />
-{:else if router.path === '/work'}
+{#if router.path === '/' || router.path === '/work'}
   <Work />
 {:else if router.path === '/crypto'}
   <Crypto />
@@ -36,5 +33,5 @@
 {:else if router.path === '/toolkit/map-to-json'}
   <MapToJson />
 {:else}
-  <Home />
+  <Work />
 {/if}

@@ -71,15 +71,15 @@
 
   function rateColor(r) {
     if (r == null) return 'text-muted-foreground'
-    if (r > 0.00004) return 'text-green-400'
-    if (r < -0.00004) return 'text-red-400'
-    return 'text-white'
+    if (r > 0.00004) return 'text-success'
+    if (r < -0.00004) return 'text-destructive'
+    return 'text-foreground'
   }
 
   function changeColor(v) {
     if (v == null) return 'text-muted-foreground'
-    if (v > 0) return 'text-green-400'
-    if (v < 0) return 'text-red-400'
+    if (v > 0) return 'text-success'
+    if (v < 0) return 'text-destructive'
     return 'text-muted-foreground'
   }
 </script>
@@ -99,31 +99,31 @@
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div class="space-y-0.5">
-              <div class="text-muted-foreground text-[10px] uppercase tracking-wide">funding rate (8h)</div>
-              <div class="text-base font-mono font-semibold {rateColor(item.last_funding_rate)}">{fmtRate(item.last_funding_rate)}</div>
-              <div class="text-muted-foreground text-[10px]">{fmtAnnualized(item.last_funding_rate)}</div>
+              <div class="text-muted-foreground text-xs uppercase tracking-wide">funding rate (8h)</div>
+              <div class="text-base font-mono font-medium {rateColor(item.last_funding_rate)}">{fmtRate(item.last_funding_rate)}</div>
+              <div class="text-muted-foreground text-xs">{fmtAnnualized(item.last_funding_rate)}</div>
             </div>
             <div class="space-y-0.5">
-              <div class="text-muted-foreground text-[10px] uppercase tracking-wide">open interest</div>
-              <div class="text-base font-mono font-semibold text-foreground">{fmtOI(item.open_interest)}</div>
-              <div class="text-muted-foreground text-[10px]">{shortSym(item.symbol)} tokens</div>
+              <div class="text-muted-foreground text-xs uppercase tracking-wide">open interest</div>
+              <div class="text-base font-mono font-medium text-foreground">{fmtOI(item.open_interest)}</div>
+              <div class="text-muted-foreground text-xs">{shortSym(item.symbol)} tokens</div>
             </div>
           </div>
           <div class="grid grid-cols-3 gap-1 pt-1 border-t border-border">
             {#each [['OI 1h', item.oi_change_1h], ['OI 4h', item.oi_change_4h], ['OI 24h', item.oi_change_24h]] as [label, val]}
               <div class="space-y-0.5">
-                <div class="text-muted-foreground text-[10px]">{label}</div>
-                <div class="font-mono text-xs font-semibold {changeColor(val)}">{fmtChange(val)}</div>
+                <div class="text-muted-foreground text-xs">{label}</div>
+                <div class="font-mono text-xs font-medium {changeColor(val)}">{fmtChange(val)}</div>
               </div>
             {/each}
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-border">
             <div class="space-y-0.5">
-              <div class="text-muted-foreground text-[10px]">mark price</div>
+              <div class="text-muted-foreground text-xs">mark price</div>
               <div class="font-mono text-xs text-foreground">{fmtPrice(item.mark_price)}</div>
             </div>
             <div class="space-y-0.5">
-              <div class="text-muted-foreground text-[10px]">index price</div>
+              <div class="text-muted-foreground text-xs">index price</div>
               <div class="font-mono text-xs text-foreground">{fmtPrice(item.index_price)}</div>
             </div>
           </div>
