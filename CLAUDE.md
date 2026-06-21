@@ -92,7 +92,7 @@ Widgets are Svelte components in `assets/svelte/widgets/`. Standard shape:
 
 **Props:**
 - `symbol` — Binance trading pair, e.g. `'ETHUSDT'` (default: `'ETHUSDT'`)
-- `indicators` — array of indicator instances (default: `[bollingerBands()]`)
+- `indicators` — array of indicator instances (default: `[bollingerBands(), ema(9), ema(21, pink), macd()]`)
 
 **Usage:**
 ```svelte
@@ -109,17 +109,23 @@ Indicators live in `assets/svelte/lib/indicators/`. Each file exports a factory 
 
 ```js
 {
+  name: string,            // display label for toggle button
+  color: string,           // swatch color for toggle button
   warmup: number,          // extra candles to fetch for initialization
+  panel?: { height, scaleId },  // present only for panel indicators
   compute(allMapped),      // pure fn: candle array → computed data array
-  mount(chart),            // adds series to chart; returns { update(data), destroy() }
+  mount(chart),            // adds series to chart; returns { setAll, updateLast, setVisible, destroy }
 }
 ```
 
-`CryptoChart` drives the lifecycle automatically: it fetches `VISIBLE + max(warmup)` candles, calls `compute` on each refresh, and calls `mount` once on chart creation (then `update` on each refresh, `destroy` on unmount).
+`CryptoChart` drives the lifecycle automatically: it fetches `VISIBLE + max(warmup)` candles, calls `compute` on each refresh, and calls `mount` once on chart creation (then `setAll`/`updateLast` on each refresh, `destroy` on unmount).
 
 **Available indicators** (`lib/indicators/index.js`):
-- `bollingerBands({ period = 20, mult = 2 })` — Bollinger Bands (upper/middle/lower, orange/purple/orange)
-- `ema({ period = 9, color = '#EAB308' })` — Exponential Moving Average (single line, any color)
+- `bollingerBands({ period = 20, mult = 2 })` — Bollinger Bands (upper/middle/lower). Main pane.
+- `ema({ period = 9, color = '#EAB308' })` — Exponential Moving Average (single line). Main pane.
+- `macd({ fast = 12, slow = 26, signal = 9 })` — MACD histogram + MACD/signal lines. Separate panel below candles.
+
+**Panel indicators** declare `panel: { height, scaleId }` on the factory return. `CryptoChart` automatically stacks panels below the candle area (above volume), computing `scaleMargins` for each. Panel `mount(chart, { scaleId, scaleMargins })` receives the computed margins and applies them to its price scale.
 
 **Adding a new indicator:**
 
@@ -130,6 +136,8 @@ import { LineSeries } from 'lightweight-charts'
 
 export function myIndicator({ period = 14 } = {}) {
   return {
+    name: 'MyInd',
+    color: '#ffffff',
     warmup: period,
     compute(candles) {
       // return array of { time, ...values }
@@ -137,7 +145,9 @@ export function myIndicator({ period = 14 } = {}) {
     mount(chart) {
       const series = chart.addSeries(LineSeries, { color: '#fff', lineWidth: 1, lastValueVisible: false, priceLineVisible: false })
       return {
-        update(data) { series.setData(data.map((d) => ({ time: d.time, value: d.myValue }))) },
+        setAll(data) { series.setData(data.map((d) => ({ time: d.time, value: d.myValue }))) },
+        updateLast(data) { for (const d of data.slice(-2)) series.update({ time: d.time, value: d.myValue }) },
+        setVisible(v) { series.applyOptions({ visible: v }) },
         destroy() { chart.removeSeries(series) },
       }
     },

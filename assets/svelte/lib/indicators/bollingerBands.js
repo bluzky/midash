@@ -2,6 +2,8 @@ import { LineSeries } from 'lightweight-charts'
 
 export function bollingerBands({ period = 20, mult = 2 } = {}) {
   return {
+    name: 'BB',
+    color: '#EAB308',
     warmup: period,
     compute(candles) {
       const bands = []
@@ -15,14 +17,26 @@ export function bollingerBands({ period = 20, mult = 2 } = {}) {
     },
     mount(chart) {
       const style = { lineWidth: 1, lastValueVisible: false, priceLineVisible: false }
-      const upper  = chart.addSeries(LineSeries, { ...style, color: '#F97316' })
+      const upper  = chart.addSeries(LineSeries, { ...style, color: '#EAB308' })
       const middle = chart.addSeries(LineSeries, { ...style, color: '#8B5CF6' })
-      const lower  = chart.addSeries(LineSeries, { ...style, color: '#F97316' })
+      const lower  = chart.addSeries(LineSeries, { ...style, color: '#8B5CF6' })
       return {
-        update(bands) {
+        setAll(bands) {
           upper.setData(bands.map((b) => ({ time: b.time, value: b.upper })))
           middle.setData(bands.map((b) => ({ time: b.time, value: b.middle })))
           lower.setData(bands.map((b) => ({ time: b.time, value: b.lower })))
+        },
+        updateLast(bands) {
+          for (const b of bands.slice(-2)) {
+            upper.update({ time: b.time, value: b.upper })
+            middle.update({ time: b.time, value: b.middle })
+            lower.update({ time: b.time, value: b.lower })
+          }
+        },
+        setVisible(v) {
+          upper.applyOptions({ visible: v })
+          middle.applyOptions({ visible: v })
+          lower.applyOptions({ visible: v })
         },
         destroy() {
           chart.removeSeries(upper)

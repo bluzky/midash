@@ -2,6 +2,8 @@ import { LineSeries } from 'lightweight-charts'
 
 export function ema({ period = 9, color = '#EAB308' } = {}) {
   return {
+    name: `EMA ${period}`,
+    color,
     warmup: period,
     compute(candles) {
       if (candles.length < period) return []
@@ -24,7 +26,11 @@ export function ema({ period = 9, color = '#EAB308' } = {}) {
         priceLineVisible: false,
       })
       return {
-        update(data) { series.setData(data) },
+        setAll(data) { series.setData(data) },
+        updateLast(data) {
+          for (const d of data.slice(-2)) series.update(d)
+        },
+        setVisible(v) { series.applyOptions({ visible: v }) },
         destroy() { chart.removeSeries(series) },
       }
     },
