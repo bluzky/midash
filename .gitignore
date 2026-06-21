@@ -40,3 +40,4 @@ npm-debug.log
 *.cub
 .fresh/
 .DS_Store
+.trekker/

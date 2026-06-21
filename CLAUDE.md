@@ -89,6 +89,26 @@ Widgets are Svelte components in `assets/svelte/widgets/`. Standard shape:
 
 Use `get`, `post`, `del` from `assets/svelte/lib/api.js`. CSRF token is read from the Phoenix-injected meta tag automatically.
 
+## Task Management
+
+Use **Trekker** (`trekker` CLI) to manage tasks. Data is stored in `.trekker/trekker.db`.
+
+```bash
+trekker init                                      # Initialize (first time)
+trekker --toon task list --status in_progress     # Check what's in progress at session start
+trekker --toon task list --status todo            # See backlog
+trekker task create -t "Title" [-d "desc"] [-e <epic-id>]
+trekker task update <task-id> -s in_progress      # Mark when starting
+trekker task update <task-id> -s completed        # Mark when done
+trekker comment add <task-id> -a "agent" -c "..."  # Add summary before completing
+```
+
+**Workflow rules:**
+1. At session start, check `in_progress` tasks first — read the task + comments for context
+2. Set status to `in_progress` when starting a task, `completed` when done
+3. Add a summary comment before marking complete
+4. Add a checkpoint comment before context resets: what's done, what's next, which files
+
 ## Styling
 
 See **`DESIGN.md`** for the full design system — colors, typography, spacing, border radius, and component guidelines. Always consult it before making visual decisions.
