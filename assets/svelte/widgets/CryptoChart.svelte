@@ -4,11 +4,11 @@
   import { ToggleGroup } from 'bits-ui'
   import { Crosshair } from '@lucide/svelte'
   import { get } from '../lib/api.js'
-  import { bollingerBands, ema, macd } from '../lib/indicators/index.js'
+  import { bollingerBands, ema, macd, superTrend } from '../lib/indicators/index.js'
   import Spinner from '../components/Spinner.svelte'
   import { baseChartOptions } from '../lib/chart-theme.js'
 
-  let { symbol = 'ETHUSDT', indicators = [bollingerBands(), ema({ period: 9, color: '#EAB308' }), ema({ period: 21, color: '#EC4899' }), macd()] } = $props()
+  let { symbol = 'ETHUSDT', indicators = [bollingerBands(), ema({ period: 9, color: '#EAB308' }), ema({ period: 21, color: '#EC4899' }), superTrend(), macd()] } = $props()
 
   const INTERVALS = [
     { key: '5m', label: '5m' },
@@ -271,9 +271,9 @@
       {#each indicators as ind, i}
         <button
           onclick={() => { enabled[i] = !enabled[i] }}
-          class="flex items-center gap-1 text-xs transition-colors hover:text-foreground {enabled[i] ? 'text-foreground' : 'text-muted-foreground'}"
+          class="text-xs transition-colors hover:opacity-80 {enabled[i] ? '' : 'text-muted-foreground'}"
+          style={enabled[i] ? `color: ${ind.color}` : ''}
         >
-          <span class="inline-block w-3" style="background:{ind.color}; height:2px"></span>
           {ind.name}
         </button>
       {/each}

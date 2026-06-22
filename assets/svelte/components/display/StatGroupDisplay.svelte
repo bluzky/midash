@@ -20,8 +20,8 @@
   <div class="grid gap-3 {COLS[cols] ?? 'grid-cols-2'}">
     {#each items as item}
       {@const trendInfo = item.trend ? TREND[item.trend] : null}
-      <div class="rounded-lg border border-border p-3 flex flex-col gap-1">
-        <div class="flex items-end justify-between gap-1">
+      <div class="rounded-lg border border-border p-3 flex flex-col items-center gap-1">
+        <div class="flex items-end justify-center gap-1">
           <span
             class="text-2xl font-mono font-semibold tabular-nums leading-none"
             style={item.color ? `color: ${item.color}` : ''}
@@ -36,7 +36,7 @@
           {/if}
         </div>
         {#if item.label}
-          <span class="text-xs text-muted-foreground uppercase tracking-wide truncate">{item.label}</span>
+          <span class="text-xs text-muted-foreground uppercase tracking-wide truncate text-center">{item.label}</span>
         {/if}
       </div>
     {/each}

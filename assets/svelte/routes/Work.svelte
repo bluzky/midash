@@ -1,15 +1,13 @@
 <script>
   import DashboardLayout from '../components/DashboardLayout.svelte'
   import Col from '../components/Col.svelte'
-  import Widget from '../components/Widget.svelte'
   import DataWidget from '../components/DataWidget.svelte'
-  import GithubMyPRs from '../widgets/GithubMyPRs.svelte'
-  import { githubPRs, githubPendingReview } from '../lib/sources/github.js'
+  import { githubPRs, githubMyPRs, githubPendingReview } from '../lib/sources/github.js'
   import { clickupTasks } from '../lib/sources/clickup.js'
 
   const REPOS = ['innoshiftco/innosync', 'innoshiftco/innoup', 'innoshiftco/innowa']
 
-  let myPrWidget
+
 </script>
 
 <DashboardLayout>
@@ -22,14 +20,17 @@
       config={{ sortable: true }}
     />
 
-    <Widget title="my prs" collapsible onRefresh={() => myPrWidget?.refresh()}>
-      <GithubMyPRs bind:this={myPrWidget} repos={REPOS} />
-    </Widget>
+    <DataWidget
+      title="my prs"
+      collapsible
+      display="tabs-list"
+      source={githubMyPRs({ repos: REPOS })}
+    />
 
     <DataWidget
       title="pending review"
       collapsible
-      display="list"
+      display="tabs-list"
       source={githubPendingReview({ repos: REPOS })}
     />
   </Col>
@@ -45,8 +46,8 @@
     <DataWidget
       title="my tasks"
       collapsible
-      display="list"
-      source={clickupTasks({ mode: 'list' })}
+      display="tabs-list"
+      source={clickupTasks({ mode: 'tabs' })}
     />
   </Col>
 </DashboardLayout>

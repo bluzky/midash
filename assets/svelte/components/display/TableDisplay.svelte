@@ -76,7 +76,9 @@
               class="py-1.5 px-0 min-w-0 {ALIGN[col.align ?? 'left']} {VARIANT[variant]}"
               style={col.width ? `width: ${col.width}` : ''}
             >
-              {#if isObj && cell.href}
+              {#if isObj && cell.href && cell.badge}
+                <a href={cell.href} target="_blank" class="bg-primary/15 text-primary hover:bg-primary/25 px-2 py-0.5 rounded-full text-xs font-mono tabular-nums inline-block transition-colors">{text}</a>
+              {:else if isObj && cell.href}
                 <a href={cell.href} target="_blank" class="underline truncate block">{text}</a>
               {:else if isObj && cell.badge}
                 <span class="bg-secondary/50 px-2 py-0.5 rounded-full text-xs font-mono tabular-nums inline-block">{text}</span>

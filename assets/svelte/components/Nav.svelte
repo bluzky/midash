@@ -28,14 +28,14 @@
   }
 </script>
 
-<nav class="fixed top-0 inset-x-0 z-50 flex items-center gap-1 border-b border-border bg-background/90 backdrop-blur px-4 py-2">
+<nav class="fixed top-0 inset-x-0 z-50 flex items-center gap-1 bg-background/90 backdrop-blur px-4 py-2">
   <img src="/images/logo.svg" alt="midash" class="h-5 mr-2" />
 
   {#each pages as page}
     <a
       href={page.path}
       onclick={(e) => handleNav(e, page.path)}
-      class="px-3 py-1.5 text-sm rounded-md transition-colors font-medium {isActive(page.path)
+      class="px-3 py-1.5 text-sm rounded-md transition-colors font-medium uppercase tracking-wide {isActive(page.path)
         ? 'bg-primary/10 text-primary'
         : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}"
     >

@@ -3,16 +3,37 @@
   import Col from '../../components/Col.svelte'
   import { navigate } from '../../lib/router.svelte.js'
   import { post } from '../../lib/api.js'
+  import { onMount } from 'svelte'
 
   const DEFAULT = '%{\n  name: "Alice",\n  age: 30,\n  tags: ["elixir", "phoenix"],\n  meta: %{active: true}\n}'
 
-  let input = $state(DEFAULT)
   let output = $state(null)
   let error = $state(null)
   let loading = $state(false)
   let copied = $state(false)
 
+  let editorEl, lineNumEl
+
+  onMount(async () => {
+    const { CodeJar } = await import('codejar')
+    const Prism = (await import('prismjs')).default
+    await import('prismjs/components/prism-elixir.js')
+
+    const updateLines = (text) => {
+      const count = text.split('\n').length
+      lineNumEl.innerHTML = Array.from({ length: count }, (_, i) => `<div>${i + 1}</div>`).join('')
+    }
+
+    const jar = CodeJar(editorEl, (el) => {
+      el.innerHTML = Prism.highlight(el.textContent, Prism.languages.elixir, 'elixir')
+      updateLines(el.textContent)
+    }, { tab: '  ' })
+    jar.updateCode(DEFAULT)
+    editorEl._jar = jar
+  })
+
   async function convert() {
+    const input = editorEl?._jar?.toString() ?? ''
     loading = true
     output = null
     error = null
@@ -38,22 +59,22 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
-      <span class="text-xs text-muted-foreground">/</span>
-      <span class="text-xs text-foreground">map → json</span>
+      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+      <span class="text-sm text-muted-foreground">/</span>
+      <span class="text-sm text-foreground">map → json</span>
     </div>
 
     <div class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label for="map-input" class="text-xs text-muted-foreground uppercase tracking-widest">Elixir Map</label>
-          <textarea
-            id="map-input"
-            bind:value={input}
-            class="h-96 w-full rounded-md border border-border bg-card p-3 font-mono text-sm text-foreground resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
-            placeholder={'%{key: "value"}'}
-            spellcheck="false"
-          ></textarea>
+          <label class="text-xs text-muted-foreground uppercase tracking-widest">Elixir Map</label>
+          <div class="flex h-96 w-full rounded-md border border-border bg-card font-mono text-sm text-foreground overflow-auto focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+            <div bind:this={lineNumEl} aria-hidden="true"
+              class="select-none text-right text-muted-foreground py-3 px-2 leading-6 border-r border-border min-w-[2.5rem] shrink-0 [&>div]:leading-6">
+            </div>
+            <div bind:this={editorEl} contenteditable="true" spellcheck="false"
+              class="flex-1 p-3 leading-6 outline-none"></div>
+          </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-xs text-muted-foreground uppercase tracking-widest">JSON</span>
@@ -62,18 +83,11 @@
       </div>
 
       <div class="flex justify-between">
-        <button
-          onclick={convert}
-          disabled={loading}
-          class="btn-primary px-4 py-2 text-xs"
-        >
+        <button onclick={convert} disabled={loading} class="btn-primary px-4 py-2 capitalize">
           {loading ? 'converting...' : 'convert'}
         </button>
         {#if output}
-          <button
-            onclick={copy}
-            class="px-4 py-2 rounded-md border border-border text-foreground text-xs font-medium hover:bg-secondary transition-colors"
-          >
+          <button onclick={copy} class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors capitalize">
             {copied ? 'copied!' : 'copy'}
           </button>
         {/if}

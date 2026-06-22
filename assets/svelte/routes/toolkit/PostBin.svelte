@@ -130,9 +130,9 @@
     {#if !binId}
       <!-- LIST PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
-        <span class="text-xs text-muted-foreground">/</span>
-        <span class="text-xs text-foreground">postbin</span>
+        <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+        <span class="text-sm text-muted-foreground">/</span>
+        <span class="text-sm text-foreground">postbin</span>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -140,7 +140,7 @@
           <p class="text-xs text-muted-foreground">create a bin, send HTTP requests to its URL, inspect them here</p>
           <button
             onclick={createBin}
-            class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors"
+            class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-foreground hover:bg-secondary transition-colors capitalize"
           >
             + new bin
           </button>
@@ -188,8 +188,8 @@
     {:else}
       <!-- BIN DETAIL PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit/postbin')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← postbin</button>
-        <span class="text-xs text-muted-foreground">/</span>
+        <button onclick={() => navigate('/toolkit/postbin')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← postbin</button>
+        <span class="text-sm text-muted-foreground">/</span>
         <span class="text-xs text-foreground font-mono">{binId}</span>
         <div class="ml-auto flex items-center gap-2">
           <span class="text-xs text-muted-foreground font-mono">{binUrl}</span>

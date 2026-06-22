@@ -24,9 +24,9 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-xs text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
-      <span class="text-xs text-muted-foreground">/</span>
-      <span class="text-xs text-foreground">barcode generator</span>
+      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+      <span class="text-sm text-muted-foreground">/</span>
+      <span class="text-sm text-foreground">barcode generator</span>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -43,14 +43,14 @@
           <button
             onclick={generate}
             disabled={loading}
-            class="btn-primary px-4 py-2 text-xs"
+            class="btn-primary px-4 py-2 capitalize"
           >
             {loading ? 'generating...' : 'generate'}
           </button>
           {#if barcodes.length}
             <button
               onclick={() => window.print()}
-              class="px-4 py-2 rounded-md border border-border text-foreground text-xs font-medium hover:bg-secondary transition-colors"
+              class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors capitalize"
             >
               print
             </button>

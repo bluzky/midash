@@ -13,6 +13,7 @@
   import AreaChartDisplay from './display/AreaChartDisplay.svelte'
   import TimelineDisplay from './display/TimelineDisplay.svelte'
   import FeedDisplay from './display/FeedDisplay.svelte'
+  import TabsListDisplay from './display/TabsListDisplay.svelte'
 
   const DISPLAYS = {
     list: ListDisplay,
@@ -27,6 +28,7 @@
     'area-chart': AreaChartDisplay,
     timeline: TimelineDisplay,
     feed: FeedDisplay,
+    'tabs-list': TabsListDisplay,
   }
 
   let {

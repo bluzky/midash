@@ -15,7 +15,7 @@ export function sentryIssues({ org, project, environment, sort = 'freq' } = {}) 
       rows: res.data.map((issue) => {
         const hot = parseInt(issue.count) > 1000
         return {
-          title: { text: issue.title, href: issue.url, variant: hot ? 'error' : 'default' },
+          title: { text: issue.title, href: issue.url, variant: hot ? 'error' : 'primary' },
           lastSeen: { text: relTimeSec(issue.lastSeen), variant: 'muted' },
           count: { text: fmtCount(issue.count), badge: true, variant: hot ? 'error' : 'default' },
         }
