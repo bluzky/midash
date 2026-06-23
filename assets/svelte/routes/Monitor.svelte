@@ -3,27 +3,20 @@
   import Col from '../components/Col.svelte'
   import Widget from '../components/Widget.svelte'
   import DataWidget from '../components/DataWidget.svelte'
+  import Spinner from '../components/Spinner.svelte'
   import { sentryIssues } from '../lib/sources/sentry.js'
+  import { get } from '../lib/api.js'
 
-  // Format: "org/project:env1:env2,..."
-  const SENTRY_PROJECTS_ENV = import.meta.env.VITE_SENTRY_PROJECTS ?? ''
+  let entries = $state([])
+  let loading = $state(true)
 
-  function parseProjects(raw) {
-    return raw
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .flatMap((entry) => {
-        const parts = entry.split(':')
-        if (parts.length < 2) return []
-        const [projectSpec, ...envs] = parts
-        const [org, project] = projectSpec.split('/')
-        if (!org || !project) return []
-        return envs.map((env) => ({ org, project, env }))
-      })
+  async function loadConfig() {
+    const res = await get('/api/config')
+    entries = res.sentry_projects ?? []
+    loading = false
   }
 
-  const entries = parseProjects(SENTRY_PROJECTS_ENV)
+  loadConfig()
 
   function chunks(arr, size) {
     const result = []
@@ -31,15 +24,19 @@
     return result
   }
 
-  const columns = chunks(entries, Math.ceil(entries.length / 2) || 1)
+  const columns = $derived(chunks(entries, Math.ceil(entries.length / 2) || 1))
 </script>
 
 <DashboardLayout>
-  {#if entries.length === 0}
+  {#if loading}
+    <Col span={12}>
+      <Spinner />
+    </Col>
+  {:else if entries.length === 0}
     <Col span={12}>
       <Widget title="monitor">
         <p class="text-sm text-muted-foreground">
-          Set <code class="bg-secondary px-1 rounded-lg">VITE_SENTRY_PROJECTS</code> env var to configure projects.
+          Set <code class="bg-secondary px-1 rounded-lg">SENTRY_PROJECTS</code> env var to configure projects.
           <br />Format: <code class="bg-secondary px-1 rounded-lg">org/project:env1:env2</code>
         </p>
       </Widget>

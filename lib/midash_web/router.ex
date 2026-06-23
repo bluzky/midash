@@ -23,6 +23,8 @@ defmodule MidashWeb.Router do
   scope "/api", MidashWeb.API do
     pipe_through :api
 
+    get "/config", ConfigController, :index
+
     get "/crypto/funding", CryptoController, :funding
     get "/crypto/klines", CryptoController, :klines
 

@@ -21,6 +21,8 @@
   const VOLUME_H = 60
   const CANDLE_PX = 6
   const RR_OPTIONS = [1, 2, 3]
+  const MIN_BARS = 120
+  const MAX_BARS = 1000
 
   const warmup = Math.max(0, ...indicators.map((ind) => ind.warmup ?? 0))
 
@@ -32,6 +34,7 @@
   let visible = $derived(containerWidth > 0 ? Math.floor(containerWidth / CANDLE_PX) : 0)
 
   let interval = $state('15m')
+  let loadedBars = $state(0)
   let enabled = $state(indicators.map((ind) => ind.name !== 'SUPER'))
   let hoveredTime = $state(null)
   let chartData = $state(null)
@@ -87,6 +90,21 @@
     }
   }
 
+  function resetLoadedBars() {
+    loadedBars = Math.min(MAX_BARS, Math.max(MIN_BARS, visible || MIN_BARS))
+  }
+
+  function changeInterval(v) {
+    if (!v || v === interval) return
+    interval = v
+    resetLoadedBars()
+    chartData = null
+    hoveredTime = null
+    measurement = null
+    overlay = null
+    fetchData('full')
+  }
+
   let emaIndexes = $derived(indicators
     .map((ind, i) => ind.name.startsWith('EMA ') ? i : null)
     .filter((i) => i !== null))
@@ -119,13 +137,13 @@
     const prevDay = dayRes.data[0]
     return {
       mode,
-      candles: allMapped.slice(-visible),
-      volume: kRes.data.slice(-visible).map((c) => ({
+      candles: allMapped.slice(-loadedBars),
+      volume: kRes.data.slice(-loadedBars).map((c) => ({
         time: Math.floor(c.open_time / 1000),
         value: c.volume,
         color: c.close >= c.open ? '#16a34a66' : '#dc262666',
       })),
-      indicatorData: indicators.map((ind) => ind.compute(allMapped).slice(-visible)),
+      indicatorData: indicators.map((ind) => ind.compute(allMapped).slice(-loadedBars)),
       pdHigh: prevDay?.high ?? null,
       pdLow: prevDay?.low ?? null,
       last: kRes.data.at(-1),
@@ -134,11 +152,12 @@
   }
 
   async function fetchData(mode = 'full') {
-    if (visible === 0) return
+    if (visible === 0 || loadedBars === 0) return
     if (mode === 'full') loading = true
     try {
+      const limit = Math.min(MAX_BARS + warmup, loadedBars + warmup)
       const [kRes, dayRes] = await Promise.all([
-        get(`/api/crypto/klines?symbol=${symbol}&interval=${interval}&limit=${visible + warmup}`),
+        get(`/api/crypto/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`),
         get(`/api/crypto/klines?symbol=${symbol}&interval=1d&limit=2`),
       ])
       chartData = buildChartData(kRes, dayRes, mode)
@@ -155,6 +174,8 @@
   $effect(() => {
     const v = visible
     if (v === 0) return
+    const target = Math.min(MAX_BARS, Math.max(MIN_BARS, v))
+    if (untrack(() => loadedBars) < target) loadedBars = target
     const t = setTimeout(() => untrack(() => fetchData('full')), 150)
     return () => clearTimeout(t)
   })
@@ -181,7 +202,7 @@
       ...baseChartOptions,
       width: node.clientWidth,
       height: h,
-      timeScale: { ...baseChartOptions.timeScale, rightOffset: 0 },
+      timeScale: { ...baseChartOptions.timeScale, barSpacing: CANDLE_PX, rightOffset: 0 },
     })
 
     const candleSeries = chart.addSeries(CandleSeries, {
@@ -216,7 +237,35 @@
     volSeries.priceScale().applyOptions({ scaleMargins: { top: (CANDLE_H + panelH) / h, bottom: 0 } })
 
     chartInstance = { chart, candleSeries }
-    chart.timeScale().subscribeVisibleLogicalRangeChange(computeOverlay)
+    let lastCandles = params.candles
+    let loadMoreTimer = null
+
+    function requestMoreData(range) {
+      if (!range || loadMoreTimer || loadedBars >= MAX_BARS) return
+      const span = range.to - range.from
+      const nearLeftEdge = range.from < -5
+      const zoomedPastLoaded = span > lastCandles.length - 20
+      if (!nearLeftEdge && !zoomedPastLoaded) return
+
+      const target = Math.min(
+        MAX_BARS,
+        Math.max(loadedBars + Math.max(visible, 50), Math.ceil(span * 1.5))
+      )
+      if (target <= loadedBars) return
+
+      loadMoreTimer = setTimeout(() => {
+        loadedBars = target
+        untrack(() => fetchData('load-more'))
+        loadMoreTimer = null
+      }, 120)
+    }
+
+    function handleVisibleLogicalRangeChange(range) {
+      computeOverlay()
+      requestMoreData(range)
+    }
+
+    chart.timeScale().subscribeVisibleLogicalRangeChange(handleVisibleLogicalRangeChange)
 
     function handleCrosshairMove(param) {
       hoveredTime = param?.time ?? null
@@ -224,7 +273,6 @@
 
     chart.subscribeCrosshairMove(handleCrosshairMove)
 
-    let lastCandles = params.candles
     candleSeries.setData(params.candles)
     volSeries.setData(params.volume)
     mounted.forEach((m, i) => {
@@ -232,11 +280,16 @@
       m.setAll(params.indicatorData[i] ?? [])
     })
     let pdLines = setPriceLines(candleSeries, params.pdHigh, params.pdLow)
-    chart.timeScale().fitContent()
+
+    function scrollToLatest() {
+      chart.timeScale().applyOptions({ barSpacing: CANDLE_PX, rightOffset: 0 })
+      chart.timeScale().scrollToRealTime()
+    }
+
+    scrollToLatest()
 
     const ro = new ResizeObserver(() => {
       chart.resize(node.clientWidth, h)
-      chart.timeScale().fitContent()
     })
     ro.observe(node)
 
@@ -246,6 +299,8 @@
         mounted.forEach((m, i) => m.setVisible(p.enabled[i]))
 
         if (!dataChanged) return
+        const previousLength = lastCandles.length
+        const previousRange = chart.timeScale().getVisibleLogicalRange?.()
         lastCandles = p.candles
 
         if (p.mode === 'incremental') {
@@ -256,7 +311,16 @@
           candleSeries.setData(p.candles)
           volSeries.setData(p.volume)
           mounted.forEach((m, i) => m.setAll(p.indicatorData[i] ?? []))
-          chart.timeScale().fitContent()
+
+          if (p.mode === 'load-more' && previousRange && p.candles.length > previousLength) {
+            const added = p.candles.length - previousLength
+            chart.timeScale().setVisibleLogicalRange({
+              from: previousRange.from + added,
+              to: previousRange.to + added,
+            })
+          } else {
+            scrollToLatest()
+          }
         }
 
         if (pdLines.high) candleSeries.removePriceLine(pdLines.high)
@@ -265,6 +329,8 @@
         computeOverlay()
       },
       destroy() {
+        if (loadMoreTimer) clearTimeout(loadMoreTimer)
+        chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleVisibleLogicalRangeChange)
         chart.unsubscribeCrosshairMove(handleCrosshairMove)
         hoveredTime = null
         mounted.forEach((m) => m.destroy())
@@ -283,7 +349,7 @@
       <ToggleGroup.Root
         type="single"
         value={interval}
-        onValueChange={(v) => { if (v) { interval = v; fetchData('full') } }}
+        onValueChange={changeInterval}
         class="flex gap-1"
       >
         {#each INTERVALS as iv}
