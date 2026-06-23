@@ -107,6 +107,8 @@ assets/svelte/
 
 ## Architecture
 
+See [`docs/widget-guide.md`](docs/widget-guide.md) for current widget, API connection, and config-dialog implementation guide.
+
 ### Routing
 
 The Phoenix router serves three scopes:

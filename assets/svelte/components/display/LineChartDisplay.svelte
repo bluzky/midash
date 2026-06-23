@@ -1,33 +1,42 @@
 <script>
-  import { createChart, LineSeries } from 'lightweight-charts'
-  import { baseChartOptions, SERIES_COLORS } from '../../lib/chart-theme.js'
+  import { createChart, LineSeries } from "lightweight-charts";
+  import { baseChartOptions, SERIES_COLORS } from "../../lib/chart-theme.js";
 
-  let { data, config = {} } = $props()
-  const { series = [] } = data ?? {}
-  const { height = 200, emptyMessage = 'no data' } = config
+  let { data, config = {} } = $props();
+  let series = $derived(data?.series ?? []);
+  let height = $derived(config.height ?? 200);
+  let emptyMessage = $derived(config.emptyMessage ?? "no data");
 
   function lineChart(node, params) {
-    const chart = createChart(node, { ...baseChartOptions, width: node.clientWidth, height })
+    const chart = createChart(node, {
+      ...baseChartOptions,
+      width: node.clientWidth,
+      height,
+    });
 
     const instances = params.series.map((s, i) => {
-      const color = s.color ?? SERIES_COLORS[i % SERIES_COLORS.length]
-      const inst = chart.addSeries(LineSeries, { color, lineWidth: 2, title: s.name ?? '' })
-      inst.setData(s.data ?? [])
-      return inst
-    })
+      const color = s.color ?? SERIES_COLORS[i % SERIES_COLORS.length];
+      const inst = chart.addSeries(LineSeries, {
+        color,
+        lineWidth: 2,
+        title: s.name ?? "",
+      });
+      inst.setData(s.data ?? []);
+      return inst;
+    });
 
-    const ro = new ResizeObserver(() => chart.resize(node.clientWidth, height))
-    ro.observe(node)
+    const ro = new ResizeObserver(() => chart.resize(node.clientWidth, height));
+    ro.observe(node);
 
     return {
       update(p) {
-        p.series.forEach((s, i) => instances[i]?.setData(s.data ?? []))
+        p.series.forEach((s, i) => instances[i]?.setData(s.data ?? []));
       },
       destroy() {
-        ro.disconnect()
-        chart.remove()
+        ro.disconnect();
+        chart.remove();
       },
-    }
+    };
   }
 </script>
 

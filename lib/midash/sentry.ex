@@ -45,12 +45,12 @@ defmodule Midash.Sentry do
       fetch_issues("gdec", "oms", %{}, sort: "date")
   """
   def fetch_issues(org_slug, project_slug, filters \\ %{}, opts \\ []) do
-    token = System.get_env("SENTRY_TOKEN")
+    token = Midash.ConfigStore.get("SENTRY_TOKEN", "")
     limit = Keyword.get(opts, :limit, 10)
     sort = Keyword.get(opts, :sort, "freq")
 
-    if is_nil(token) do
-      Logger.error("[Sentry] SENTRY_TOKEN environment variable is not set!")
+    if token == "" do
+      Logger.error("[Sentry] SENTRY_TOKEN is not configured!")
       {:error, "SENTRY_TOKEN not configured"}
     else
       do_fetch_issues(token, org_slug, project_slug, filters, limit, sort)

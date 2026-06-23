@@ -24,6 +24,7 @@ defmodule MidashWeb.Router do
     pipe_through :api
 
     get "/config", ConfigController, :index
+    post "/config", ConfigController, :update
 
     get "/crypto/funding", CryptoController, :funding
     get "/crypto/klines", CryptoController, :klines

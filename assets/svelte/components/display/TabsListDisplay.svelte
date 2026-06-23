@@ -1,11 +1,14 @@
 <script>
-  import { Tabs } from 'bits-ui'
-  import ListDisplay from './ListDisplay.svelte'
+  import { Tabs } from "bits-ui";
+  import ListDisplay from "./ListDisplay.svelte";
 
-  let { data, config = {} } = $props()
-  const { tabs = [] } = data ?? {}
-  // svelte-ignore state_referenced_locally
-  let active = $state(tabs[0]?.key ?? '')
+  let { data, config = {} } = $props();
+  let tabs = $derived(data?.tabs ?? []);
+  let active = $state("");
+
+  $effect(() => {
+    if (!tabs.some((tab) => tab.key === active)) active = tabs[0]?.key ?? "";
+  });
 </script>
 
 {#if !tabs.length}
@@ -22,7 +25,12 @@
         >
           {tab.label}
           {#if tab.count != null}
-            <span class="text-xs tabular-nums px-1.5 py-0.5 rounded-full {tab.count > 0 ? 'bg-primary/15 text-primary' : 'bg-secondary text-muted-foreground'}">{tab.count}</span>
+            <span
+              class="text-xs tabular-nums px-1.5 py-0.5 rounded-full {tab.count >
+              0
+                ? 'bg-primary/15 text-primary'
+                : 'bg-secondary text-muted-foreground'}">{tab.count}</span
+            >
           {/if}
         </Tabs.Trigger>
       {/each}

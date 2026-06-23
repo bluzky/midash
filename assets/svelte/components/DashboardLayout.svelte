@@ -1,7 +1,7 @@
 <script>
-  import Nav from './Nav.svelte'
+  import Nav from "./Nav.svelte";
 
-  let { children } = $props()
+  let { children } = $props();
 </script>
 
 <div class="min-h-screen bg-background text-foreground">

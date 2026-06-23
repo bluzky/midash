@@ -1,9 +1,42 @@
 defmodule MidashWeb.API.ConfigController do
   use MidashWeb, :controller
 
+  @config_keys ~w(
+    GITHUB_TOKEN
+    GITHUB_USERNAME
+    CLICKUP_TOKEN
+    CLICKUP_TEAM_ID
+    CLICKUP_USER_ID
+    SENTRY_TOKEN
+    SENTRY_PROJECTS
+    ARGOCD_URL
+    ARGOCD_TOKEN
+  )
+
   def index(conn, _params) do
-    sentry_projects = parse_sentry_projects(System.get_env("SENTRY_PROJECTS", ""))
-    json(conn, %{sentry_projects: sentry_projects})
+    sentry_projects = parse_sentry_projects(Midash.ConfigStore.get("SENTRY_PROJECTS", ""))
+    json(conn, %{sentry_projects: sentry_projects, configured: configured()})
+  end
+
+  def update(conn, params) do
+    values = Map.take(params, @config_keys)
+
+    case Midash.ConfigStore.put_many(values) do
+      {:ok, data} -> json(conn, %{ok: true, configured: configured_from(data)})
+      {:error, reason} -> conn |> put_status(500) |> json(%{error: inspect(reason)})
+    end
+  end
+
+  defp configured do
+    Map.new(@config_keys, &{&1, Midash.ConfigStore.configured?(&1)})
+  end
+
+  defp configured_from(data) do
+    Map.new(@config_keys, fn key ->
+      stored = Map.get(data, key, "")
+      value = if is_binary(stored) and stored != "", do: stored, else: System.get_env(key, "")
+      {key, value != ""}
+    end)
   end
 
   # Parses "org/project:env1:env2,..." into [{org, project, env}] entries

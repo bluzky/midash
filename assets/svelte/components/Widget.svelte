@@ -1,30 +1,37 @@
 <script>
-  import { Collapsible } from 'bits-ui'
-  import { RotateCw, ChevronDown } from '@lucide/svelte'
+  import { Collapsible } from "bits-ui";
+  import { RotateCw, ChevronDown } from "@lucide/svelte";
 
   let {
     title = null,
     collapsible = false,
     onRefresh = null,
-    class: cls = '',
-    headerClass = '',
+    class: cls = "",
+    headerClass = "",
     children,
-  } = $props()
+  } = $props();
 
-  let open = $state(true)
-  let spinning = $state(false)
+  let open = $state(true);
+  let spinning = $state(false);
 
   async function handleRefresh() {
-    if (!onRefresh) return
-    spinning = true
-    try { await onRefresh() } finally { spinning = false }
+    if (!onRefresh) return;
+    spinning = true;
+    try {
+      await onRefresh();
+    } finally {
+      spinning = false;
+    }
   }
 </script>
 
 <div class="widget-card mb-4 last:mb-0 {cls}">
   {#if title}
     <Collapsible.Root bind:open disabled={!collapsible}>
-      <div class="px-4 py-2.5 border-b border-border text-xs font-medium uppercase tracking-widest flex items-center justify-between {headerClass || 'text-muted-foreground'}">
+      <div
+        class="px-4 py-2.5 border-b border-border text-xs font-medium uppercase tracking-widest flex items-center justify-between {headerClass ||
+          'text-muted-foreground'}"
+      >
         <span>{title}</span>
         <span class="flex items-center gap-1">
           {#if onRefresh}
@@ -41,7 +48,11 @@
               class="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               title="collapse"
             >
-              <ChevronDown class="w-3.5 h-3.5 transition-transform {open ? '' : '-rotate-90'}" />
+              <ChevronDown
+                class="w-3.5 h-3.5 transition-transform {open
+                  ? ''
+                  : '-rotate-90'}"
+              />
             </Collapsible.Trigger>
           {/if}
         </span>

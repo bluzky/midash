@@ -1,11 +1,12 @@
 <script>
-  let { data, config = {} } = $props()
-  const { items = [] } = data ?? {}
-  const { showPercent = true, showValues = false } = config
+  let { data, config = {} } = $props();
+  let items = $derived(data?.items ?? []);
+  let showPercent = $derived(config.showPercent ?? true);
+  let showValues = $derived(config.showValues ?? false);
 
   function pct(value, max) {
-    if (!max) return 0
-    return Math.min(100, Math.round((value / max) * 100))
+    if (!max) return 0;
+    return Math.min(100, Math.round((value / max) * 100));
   }
 </script>
 
@@ -26,7 +27,8 @@
         <div class="h-1.5 rounded-full bg-secondary overflow-hidden">
           <div
             class="h-full rounded-full transition-all duration-300"
-            style="width: {p}%; background-color: {item.color ?? 'var(--primary)'}"
+            style="width: {p}%; background-color: {item.color ??
+              'var(--primary)'}"
           ></div>
         </div>
       </div>

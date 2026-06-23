@@ -1,11 +1,11 @@
 <script>
-  import DashboardLayout from '../components/DashboardLayout.svelte'
-  import Col from '../components/Col.svelte'
-  import Widget from '../components/Widget.svelte'
-  import CryptoChart from '../widgets/CryptoChart.svelte'
+  import DashboardLayout from "../components/DashboardLayout.svelte";
+  import Col from "../components/Col.svelte";
+  import Widget from "../components/Widget.svelte";
+  import CryptoChart from "../widgets/CryptoChart.svelte";
 
-  const SYMBOLS = ['ETHUSDT', 'BTCUSDT', 'ZECUSDC', 'HYPEUSDT']
-  let widgets = $state({})
+  const SYMBOLS = ["ETHUSDT", "BTCUSDT", "ZECUSDC", "HYPEUSDT"];
+  let widgets = $state({});
 </script>
 
 <DashboardLayout>
