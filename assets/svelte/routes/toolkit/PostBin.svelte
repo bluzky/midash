@@ -130,9 +130,9 @@
     {#if !binId}
       <!-- LIST PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+        <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">Toolkit</button>
         <span class="text-sm text-muted-foreground">/</span>
-        <span class="text-sm text-foreground">postbin</span>
+        <span class="text-sm text-foreground">PostBin</span>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -188,9 +188,9 @@
     {:else}
       <!-- BIN DETAIL PAGE -->
       <div class="mb-3 flex items-center gap-3">
-        <button onclick={() => navigate('/toolkit/postbin')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← postbin</button>
+        <button onclick={() => navigate('/toolkit/postbin')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">PostBin</button>
         <span class="text-sm text-muted-foreground">/</span>
-        <span class="text-xs text-foreground font-mono">{binId}</span>
+        <span class="text-sm text-foreground font-mono">{binId}</span>
         <div class="ml-auto flex items-center gap-2">
           <span class="text-xs text-muted-foreground font-mono">{binUrl}</span>
           <button onclick={copyUrl} class="text-xs text-muted-foreground hover:text-foreground transition-colors" title="copy URL">⎘</button>

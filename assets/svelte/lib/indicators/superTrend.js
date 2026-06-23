@@ -2,7 +2,7 @@ import { LineSeries } from 'lightweight-charts'
 
 export function superTrend({ period = 10, multiplier = 3 } = {}) {
   return {
-    name: `ST ${period}`,
+    name: 'SUPER',
     color: '#10B981',
     warmup: Math.max(period * 10, 100),
     compute(candles) {

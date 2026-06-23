@@ -40,6 +40,7 @@ defmodule MidashWeb.Router do
     post "/toolkit/barcode", ToolkitController, :barcode
     post "/toolkit/mau", ToolkitController, :mau
     post "/toolkit/map-to-json", ToolkitController, :map_to_json
+    post "/toolkit/json-to-map", ToolkitController, :json_to_map
 
     get "/postbin/bins", PostbinController, :index
     post "/postbin/bins", PostbinController, :create

@@ -70,9 +70,9 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">Toolkit</button>
       <span class="text-sm text-muted-foreground">/</span>
-      <span class="text-sm text-foreground">mau template</span>
+      <span class="text-sm text-foreground">Mau Template</span>
     </div>
 
     <div class="flex flex-col gap-4">

@@ -5,6 +5,12 @@ export function ema({ period = 9, color = '#EAB308' } = {}) {
     name: `EMA ${period}`,
     color,
     warmup: period,
+    valueLabel(data, time = null) {
+      const point = time == null ? data.at(-1) : data.find((d) => d.time === time)
+      const value = point?.value
+      if (value == null) return null
+      return `${this.name}(${value.toFixed(value >= 100 ? 2 : 4)})`
+    },
     compute(candles) {
       if (candles.length < period) return []
       const k = 2 / (period + 1)

@@ -32,13 +32,14 @@
     editorEl._jar = jar
   })
 
-  async function convert() {
+  async function convert(direction) {
     const input = editorEl?._jar?.toString() ?? ''
     loading = true
     output = null
     error = null
     try {
-      const res = await post('/api/toolkit/map-to-json', { input })
+      const endpoint = direction === 'map-to-json' ? '/api/toolkit/map-to-json' : '/api/toolkit/json-to-map'
+      const res = await post(endpoint, { input })
       if (res.error) error = res.error
       else output = res.output
     } catch (e) {
@@ -59,15 +60,15 @@
 <DashboardLayout>
   <Col span={12}>
     <div class="mb-3 flex items-center gap-3">
-      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">← toolkit</button>
+      <button onclick={() => navigate('/toolkit')} class="text-sm text-muted-foreground hover:text-foreground transition-colors">Toolkit</button>
       <span class="text-sm text-muted-foreground">/</span>
-      <span class="text-sm text-foreground">map → json</span>
+      <span class="text-sm text-foreground">Map ↔ JSON</span>
     </div>
 
     <div class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label class="text-xs text-muted-foreground uppercase tracking-widest">Elixir Map</label>
+          <label class="text-xs text-muted-foreground uppercase tracking-widest">Input</label>
           <div class="flex h-96 w-full rounded-md border border-border bg-card font-mono text-sm text-foreground overflow-auto focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
             <div bind:this={lineNumEl} aria-hidden="true"
               class="select-none text-right text-muted-foreground py-3 px-2 leading-6 border-r border-border min-w-[2.5rem] shrink-0 [&>div]:leading-6">
@@ -77,20 +78,27 @@
           </div>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-xs text-muted-foreground uppercase tracking-widest">JSON</span>
+          <span class="text-xs text-muted-foreground uppercase tracking-widest">Output</span>
           <pre class="h-96 rounded-lg border border-border p-3 text-sm font-mono overflow-auto whitespace-pre-wrap {error ? 'bg-destructive/10 text-destructive' : 'bg-secondary text-foreground'}">{error ?? output ?? '// output appears here'}</pre>
         </div>
       </div>
 
-      <div class="flex justify-between">
-        <button onclick={convert} disabled={loading} class="btn-primary px-4 py-2 capitalize">
-          {loading ? 'converting...' : 'convert'}
-        </button>
-        {#if output}
-          <button onclick={copy} class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors capitalize">
-            {copied ? 'copied!' : 'copy'}
+      <div class="flex items-center justify-between">
+        <div class="flex gap-2">
+          <button onclick={() => convert('map-to-json')} disabled={loading} class="btn-primary px-4 py-2">
+            Map → JSON
           </button>
-        {/if}
+          <button onclick={() => convert('json-to-map')} disabled={loading} class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors">
+            JSON → Map
+          </button>
+        </div>
+        <button
+          onclick={copy}
+          disabled={!output}
+          class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
       </div>
     </div>
   </Col>

@@ -58,10 +58,10 @@
         onclick={() => navigate('/toolkit')}
         class="text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← toolkit
+        Toolkit
       </button>
       <span class="text-sm text-muted-foreground">/</span>
-      <span class="text-sm text-foreground">elixir execute</span>
+      <span class="text-sm text-foreground">Elixir Execute</span>
     </div>
 
     <div class="flex flex-col gap-4">

@@ -1,14 +1,14 @@
 <script>
   import { onMount, untrack } from 'svelte'
   import { createChart, CandlestickSeries as CandleSeries, HistogramSeries as VolSeries, LineStyle } from 'lightweight-charts'
-  import { ToggleGroup } from 'bits-ui'
-  import { Crosshair } from '@lucide/svelte'
+  import { DropdownMenu, ToggleGroup } from 'bits-ui'
+  import { Check, Crosshair, Settings2 } from '@lucide/svelte'
   import { get } from '../lib/api.js'
-  import { bollingerBands, ema, macd, superTrend } from '../lib/indicators/index.js'
+  import { bollingerBands, ema, macd, marketStructure, orderBlock, superTrend } from '../lib/indicators/index.js'
   import Spinner from '../components/Spinner.svelte'
   import { baseChartOptions } from '../lib/chart-theme.js'
 
-  let { symbol = 'ETHUSDT', indicators = [bollingerBands(), ema({ period: 9, color: '#EAB308' }), ema({ period: 21, color: '#EC4899' }), superTrend(), macd()] } = $props()
+  let { symbol = 'ETHUSDT', indicators = [bollingerBands(), ema({ period: 9, color: '#EAB308' }), ema({ period: 21, color: '#EC4899' }), superTrend(), marketStructure(), orderBlock(), macd()] } = $props()
 
   const INTERVALS = [
     { key: '5m', label: '5m' },
@@ -19,7 +19,7 @@
   ]
   const CANDLE_H = 260
   const VOLUME_H = 60
-  const CANDLE_PX = 8
+  const CANDLE_PX = 6
   const RR_OPTIONS = [1, 2, 3]
 
   const warmup = Math.max(0, ...indicators.map((ind) => ind.warmup ?? 0))
@@ -32,7 +32,8 @@
   let visible = $derived(containerWidth > 0 ? Math.floor(containerWidth / CANDLE_PX) : 0)
 
   let interval = $state('15m')
-  let enabled = $state(indicators.map(() => true))
+  let enabled = $state(indicators.map((ind) => ind.name !== 'SUPER'))
+  let hoveredTime = $state(null)
   let chartData = $state(null)
   let loading = $state(true)
 
@@ -83,6 +84,27 @@
       const risk = measurement.entryPrice - measurement.slPrice
       measurement = { ...measurement, tpPrice: measurement.entryPrice + risk * ratio }
       computeOverlay()
+    }
+  }
+
+  let emaIndexes = $derived(indicators
+    .map((ind, i) => ind.name.startsWith('EMA ') ? i : null)
+    .filter((i) => i !== null))
+  let menuIndicators = $derived([
+    ...(emaIndexes.length ? [{ type: 'ema', name: 'EMA', color: indicators[emaIndexes[0]]?.color }] : []),
+    ...indicators.map((ind, i) => ({ type: 'single', ind, i })).filter((item) => !item.ind.name.startsWith('EMA ')),
+  ])
+
+  function menuItemEnabled(item) {
+    return item.type === 'ema' ? emaIndexes.some((i) => enabled[i]) : enabled[item.i]
+  }
+
+  function toggleMenuItem(item) {
+    if (item.type === 'ema') {
+      const next = !emaIndexes.some((i) => enabled[i])
+      emaIndexes.forEach((i) => (enabled[i] = next))
+    } else {
+      enabled[item.i] = !enabled[item.i]
     }
   }
 
@@ -196,6 +218,12 @@
     chartInstance = { chart, candleSeries }
     chart.timeScale().subscribeVisibleLogicalRangeChange(computeOverlay)
 
+    function handleCrosshairMove(param) {
+      hoveredTime = param?.time ?? null
+    }
+
+    chart.subscribeCrosshairMove(handleCrosshairMove)
+
     let lastCandles = params.candles
     candleSeries.setData(params.candles)
     volSeries.setData(params.volume)
@@ -237,6 +265,8 @@
         computeOverlay()
       },
       destroy() {
+        chart.unsubscribeCrosshairMove(handleCrosshairMove)
+        hoveredTime = null
         mounted.forEach((m) => m.destroy())
         ro.disconnect()
         chart.remove()
@@ -248,64 +278,95 @@
 </script>
 
 <div class="space-y-1" bind:clientWidth={containerWidth}>
-  <div class="flex items-center gap-1 mb-3">
-    <ToggleGroup.Root
-      type="single"
-      value={interval}
-      onValueChange={(v) => { if (v) { interval = v; fetchData('full') } }}
-      class="flex gap-1"
-    >
-      {#each INTERVALS as iv}
-        <ToggleGroup.Item
-          value={iv.key}
-          class="px-2 py-0.5 text-xs rounded-md border transition-colors outline-none
-            data-[state=on]:border-primary data-[state=on]:text-primary data-[state=on]:bg-primary/10
-            data-[state=off]:border-border data-[state=off]:text-muted-foreground hover:text-foreground hover:bg-secondary"
-        >
-          {iv.label}
-        </ToggleGroup.Item>
-      {/each}
-    </ToggleGroup.Root>
+  <div class="mb-3 space-y-2">
+    <div class="flex items-center gap-1">
+      <ToggleGroup.Root
+        type="single"
+        value={interval}
+        onValueChange={(v) => { if (v) { interval = v; fetchData('full') } }}
+        class="flex gap-1"
+      >
+        {#each INTERVALS as iv}
+          <ToggleGroup.Item
+            value={iv.key}
+            class="px-2 py-0.5 text-xs rounded-md border transition-colors outline-none
+              data-[state=on]:border-primary data-[state=on]:text-primary data-[state=on]:bg-primary/10
+              data-[state=off]:border-border data-[state=off]:text-muted-foreground hover:text-foreground hover:bg-secondary"
+          >
+            {iv.label}
+          </ToggleGroup.Item>
+        {/each}
+      </ToggleGroup.Root>
 
-    <div class="flex items-center gap-2 ml-2 pl-2 border-l border-border">
-      {#each indicators as ind, i}
+      <div class="flex items-center gap-1 ml-auto pl-2 border-l border-border">
         <button
-          onclick={() => { enabled[i] = !enabled[i] }}
-          class="text-xs transition-colors hover:opacity-80 {enabled[i] ? '' : 'text-muted-foreground'}"
-          style={enabled[i] ? `color: ${ind.color}` : ''}
+          onclick={() => { measureMode = !measureMode }}
+          class="flex items-center gap-1 px-2 py-0.5 text-xs rounded-md border transition-colors outline-none
+            {measureMode
+              ? 'border-primary text-primary bg-primary/10'
+              : 'border-border text-muted-foreground hover:text-foreground hover:bg-secondary'}"
         >
-          {ind.name}
+          <Crosshair size={11} />
+          R:R
         </button>
-      {/each}
+        {#each RR_OPTIONS as rr}
+          <button
+            onclick={() => setRR(rr)}
+            class="px-1.5 py-0.5 text-xs rounded-sm border transition-colors outline-none
+              {rrRatio === rr ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:text-foreground'}"
+          >
+            {rr}R
+          </button>
+        {/each}
+        {#if measurement}
+          <button
+            onclick={() => { measurement = null; overlay = null }}
+            class="px-1 text-xs text-muted-foreground hover:text-foreground transition-colors leading-none"
+            title="Clear measurement"
+          >×</button>
+        {/if}
+      </div>
     </div>
 
-    <div class="flex items-center gap-1 ml-auto pl-2 border-l border-border">
-      <button
-        onclick={() => { measureMode = !measureMode }}
-        class="flex items-center gap-1 px-2 py-0.5 text-xs rounded-md border transition-colors outline-none
-          {measureMode
-            ? 'border-primary text-primary bg-primary/10'
-            : 'border-border text-muted-foreground hover:text-foreground hover:bg-secondary'}"
-      >
-        <Crosshair size={11} />
-        R:R
-      </button>
-      {#each RR_OPTIONS as rr}
-        <button
-          onclick={() => setRR(rr)}
-          class="px-1.5 py-0.5 text-xs rounded-sm border transition-colors outline-none
-            {rrRatio === rr ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:text-foreground'}"
+    <div class="relative flex items-center gap-x-3 gap-y-1 border-t border-border pt-2">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+        {#each indicators as ind, i}
+          {#if enabled[i] && ind.valueLabel && chartData?.indicatorData?.[i]?.length}
+            <span class="text-xs" style={`color: ${ind.color}`}>
+              {ind.valueLabel(chartData.indicatorData[i], hoveredTime)}
+            </span>
+          {/if}
+        {/each}
+      </div>
+
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          class="ml-auto shrink-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          title="Indicators"
         >
-          {rr}R
-        </button>
-      {/each}
-      {#if measurement}
-        <button
-          onclick={() => { measurement = null; overlay = null }}
-          class="px-1 text-xs text-muted-foreground hover:text-foreground transition-colors leading-none"
-          title="Clear measurement"
-        >×</button>
-      {/if}
+          <Settings2 size={13} />
+        </DropdownMenu.Trigger>
+
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="end"
+            sideOffset={4}
+            class="z-20 min-w-32 rounded-md border border-border bg-card shadow-lg overflow-hidden"
+          >
+            {#each menuIndicators as item}
+              <DropdownMenu.Item
+                onSelect={() => toggleMenuItem(item)}
+                class="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-xs text-foreground hover:bg-secondary focus:bg-secondary outline-none transition-colors"
+              >
+                <span>{item.type === 'ema' ? item.name : item.ind.name}</span>
+                <span class="text-muted-foreground">
+                  {#if menuItemEnabled(item)}<Check size={12} />{/if}
+                </span>
+              </DropdownMenu.Item>
+            {/each}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </div>
   </div>
 

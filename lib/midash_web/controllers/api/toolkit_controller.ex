@@ -60,6 +60,15 @@ defmodule MidashWeb.API.ToolkitController do
     end
   end
 
+  def json_to_map(conn, params) do
+    input = Map.get(params, "input", "")
+
+    case Jason.decode(input) do
+      {:ok, value} -> json(conn, %{output: inspect(value, pretty: true)})
+      {:error, err} -> json(conn, %{error: "Invalid JSON: #{Exception.message(err)}"})
+    end
+  end
+
   defp run_elixir(input, code) do
     binding = [input: input]
     {result, _} = Code.eval_string(code, binding)
