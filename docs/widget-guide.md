@@ -68,36 +68,70 @@ get "/my-service/items", API.MyServiceController, :items
 
 Create `assets/svelte/lib/sources/my-service.js`.
 
+Sources return a descriptor object `{ key, fetch, staleTime? }` — not a plain async function. `DataWidget` passes this to TanStack Query automatically.
+
 ```js
 import { get } from '../api.js'
 
 export function myServiceItems() {
-  return async () => {
-    const res = await get('/api/my-service/items')
-    return {
-      columns: [
-        { key: 'title', label: 'title' },
-        { key: 'status', label: 'status' },
-      ],
-      rows: res.data.map((item) => ({
-        title: item.title,
-        status: item.status ?? 'unknown',
-      })),
-    }
+  return {
+    key: '/api/my-service/items',   // cache key — must be unique per logical query
+    staleTime: 60,                   // optional, seconds (default 60)
+    async fetch() {
+      const res = await get('/api/my-service/items')
+      return {
+        columns: [
+          { key: 'title', label: 'title' },
+          { key: 'status', label: 'status' },
+        ],
+        rows: res.data.map((item) => ({
+          title: item.title,
+          status: item.status ?? 'unknown',
+        })),
+      }
+    },
   }
 }
 ```
 
-Frontend-only source example:
+If the source takes params that affect the result, include them in `key`:
+
+```js
+export function myServiceItems({ filter = 'all' } = {}) {
+  return {
+    key: `/api/my-service/items?filter=${filter}`,
+    async fetch() {
+      const res = await get(`/api/my-service/items?filter=${filter}`)
+      // ...
+    },
+  }
+}
+```
+
+If two sources call the same URL but produce different shapes, use a `#suffix` to distinguish the cache keys:
+
+```js
+export function clickupTasks({ mode = 'count' } = {}) {
+  return {
+    key: `/api/clickup/tasks#${mode}`,
+    async fetch() { /* ... */ },
+  }
+}
+```
+
+Frontend-only source (no backend call):
 
 ```js
 export function localStats() {
-  return async () => ({
-    items: [
-      { label: 'loaded', value: performance.getEntriesByType('resource').length },
-      { label: 'timezone', value: Intl.DateTimeFormat().resolvedOptions().timeZone },
-    ],
-  })
+  return {
+    key: 'local#stats',
+    fetch: async () => ({
+      items: [
+        { label: 'loaded', value: performance.getEntriesByType('resource').length },
+        { label: 'timezone', value: Intl.DateTimeFormat().resolvedOptions().timeZone },
+      ],
+    }),
+  }
 }
 ```
 
@@ -149,13 +183,48 @@ Props:
 
 - `title` — widget title.
 - `display` — display component key.
-- `source` — async function returning display data.
+- `source` — source descriptor `{ key, fetch, staleTime? }` from a sources file.
 - `config` — display-specific options.
 - `configGroup` — config key group for configure dialog fallback on API errors.
-- `poll` — seconds between refreshes.
+- `poll` — seconds between auto-refreshes (`refetchInterval`).
 - `collapsible` — enables collapse button.
 
-## 5. Config schema
+## 5. Caching
+
+`DataWidget` uses **TanStack Query** (`@tanstack/svelte-query`). The `QueryClient` is set up in `App.svelte` with a 60s default `staleTime`.
+
+Behaviour out of the box:
+- Navigate away and back → cached data renders instantly; background refetch happens silently
+- Manual refresh → keeps showing old data while fetching (no spinner flash)
+- Concurrent widgets hitting the same URL → `api.js` deduplicates the HTTP request to one
+
+For bespoke route components that can't use `DataWidget`, call `createQuery` directly:
+
+```svelte
+<script>
+  import { createQuery } from '@tanstack/svelte-query'
+  import { get } from '../lib/api.js'
+
+  const q = createQuery(() => ({
+    queryKey: ['/api/my-endpoint'],
+    queryFn: () => get('/api/my-endpoint').then(r => r.data),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  }))
+</script>
+
+{#if q.isPending}
+  <Spinner />
+{:else if q.isError}
+  <div class="text-destructive text-sm">{q.error.message}</div>
+{:else}
+  <!-- render q.data -->
+{/if}
+```
+
+Note: `createQuery` takes a **function** `() => options`, not a plain object.
+
+## 6. Config schema
 
 Frontend config fields live in one central file:
 
@@ -201,7 +270,7 @@ Add every key to `@config_keys`:
 
 Config saves to local `.midash_config.json`. File values override environment variables.
 
-## 6. Missing config behavior
+## 7. Missing config behavior
 
 If backend returns:
 
@@ -217,7 +286,7 @@ If remote API returns any other error, `DataWidget` still shows configure button
 <DataWidget configGroup="MYSERVICE_TOKEN" ... />
 ```
 
-## 7. Custom widget component
+## 8. Custom widget component
 
 Use custom component when `DataWidget` display types are not enough.
 
@@ -257,7 +326,7 @@ Use custom component when `DataWidget` display types are not enough.
 </Widget>
 ```
 
-## 8. Verify
+## 9. Verify
 
 Run both:
 

@@ -329,11 +329,9 @@
       priceScaleId: "volume",
       priceFormat: { type: "volume" },
     });
-    volSeries
-      .priceScale()
-      .applyOptions({
-        scaleMargins: { top: (CANDLE_H + panelH) / h, bottom: 0 },
-      });
+    volSeries.priceScale().applyOptions({
+      scaleMargins: { top: (CANDLE_H + panelH) / h, bottom: 0 },
+    });
 
     chartInstance = { chart, candleSeries };
     let lastCandles = params.candles;

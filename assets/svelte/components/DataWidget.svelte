@@ -4,6 +4,7 @@
   import ConfigDialog from "./ConfigDialog.svelte";
   import { Settings2 } from "@lucide/svelte";
   import { configFieldsFor, configTitleFor } from "../lib/config-schema.js";
+  import { createQuery } from "@tanstack/svelte-query";
   import ListDisplay from "./display/ListDisplay.svelte";
   import TableDisplay from "./display/TableDisplay.svelte";
   import KeyValueDisplay from "./display/KeyValueDisplay.svelte";
@@ -46,49 +47,38 @@
     configGroup = null,
   } = $props();
 
-  let data = $state(null);
-  let loading = $state(true);
-  let error = $state(null);
+  // svelte-ignore state_referenced_locally
+  const { key, fetch: fetchFn, staleTime = 60 } = source;
+  // svelte-ignore state_referenced_locally
+  const pollMs = poll ? poll * 1000 : false;
+
+  const q = createQuery(() => ({
+    queryKey: [key],
+    queryFn: fetchFn,
+    staleTime: staleTime * 1000,
+    refetchInterval: pollMs,
+  }));
+
   let configOpen = $state(false);
 
   let missingKey = $derived(
-    error?.match(/([A-Z0-9_]+) not configured/)?.[1] ?? null,
+    q.error?.message?.match(/([A-Z0-9_]+) not configured/)?.[1] ?? null,
   );
   let configKey = $derived(missingKey ?? configGroup);
   let configFields = $derived(configFieldsFor(configKey));
   let configTitle = $derived(configTitleFor(configKey));
 
-  async function load() {
-    if (data === null) loading = true;
-    error = null;
-    try {
-      data = await source();
-    } catch (e) {
-      error = e.message;
-    } finally {
-      loading = false;
-    }
-  }
-
-  load();
-
-  $effect(() => {
-    if (!poll) return;
-    const id = setInterval(load, poll * 1000);
-    return () => clearInterval(id);
-  });
-
   let DisplayComponent = $derived(DISPLAYS[display]);
 </script>
 
-<Widget {title} {collapsible} class={cls} {headerClass} onRefresh={load}>
-  {#if loading}
+<Widget {title} {collapsible} class={cls} {headerClass} onRefresh={q.refetch}>
+  {#if q.isPending}
     <Spinner />
-  {:else if error}
+  {:else if q.isError && !q.data}
     <div
       class="flex flex-col items-center justify-center gap-3 py-4 text-center"
     >
-      <div class="text-destructive text-sm">{error}</div>
+      <div class="text-destructive text-sm">{q.error.message}</div>
       {#if configFields.length}
         <button
           onclick={() => (configOpen = true)}
@@ -99,9 +89,9 @@
         </button>
       {/if}
     </div>
-  {:else if DisplayComponent}
-    <DisplayComponent {data} {config} />
-  {:else}
+  {:else if DisplayComponent && q.data}
+    <DisplayComponent data={q.data} {config} />
+  {:else if !DisplayComponent}
     <div class="text-muted-foreground text-sm">unknown display: {display}</div>
   {/if}
 </Widget>
@@ -110,5 +100,5 @@
   bind:open={configOpen}
   title={configTitle}
   fields={configFields}
-  onSaved={load}
+  onSaved={q.refetch}
 />

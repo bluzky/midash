@@ -1,25 +1,44 @@
 <script>
+  import QRCode from "qrcode";
   import DashboardLayout from "../../components/DashboardLayout.svelte";
   import Col from "../../components/Col.svelte";
   import { navigate } from "../../lib/router.svelte.js";
   import { post } from "../../lib/api.js";
 
   let input = $state("");
-  let barcodes = $state([]);
-  let loading = $state(false);
+  let codes = $state([]);
+  let loadingMode = $state(null);
+  let mode = $state("barcode");
 
-  async function generate() {
-    const codes = input
+  async function generate(type) {
+    const values = input
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
-    if (!codes.length) return;
-    loading = true;
+    if (!values.length) return;
+    loadingMode = type;
+    mode = type;
     try {
-      const res = await post("/api/toolkit/barcode", { codes });
-      barcodes = res.data;
+      if (type === "qr") {
+        codes = await Promise.all(
+          values.map(async (value) => ({
+            value,
+            svg: await QRCode.toString(value, {
+              type: "svg",
+              margin: 1,
+              width: 180,
+            }),
+            error: null,
+          })),
+        );
+      } else {
+        const res = await post("/api/toolkit/barcode", { codes: values });
+        codes = res.data;
+      }
+    } catch (e) {
+      codes = values.map((value) => ({ value, svg: null, error: e.message }));
     } finally {
-      loading = false;
+      loadingMode = null;
     }
   }
 </script>
@@ -41,7 +60,7 @@
         <label
           for="barcode-input"
           class="text-xs text-muted-foreground uppercase tracking-widest"
-          >Barcodes (one per line)</label
+          >Codes (one per line)</label
         >
         <textarea
           id="barcode-input"
@@ -52,16 +71,23 @@
         ></textarea>
         <div class="flex items-center gap-3">
           <button
-            onclick={generate}
-            disabled={loading}
+            onclick={() => generate("barcode")}
+            disabled={loadingMode !== null}
             class="btn-primary px-4 py-2 capitalize"
           >
-            {loading ? "generating..." : "generate"}
+            {loadingMode === "barcode" ? "generating..." : "generate barcode"}
           </button>
-          {#if barcodes.length}
+          <button
+            onclick={() => generate("qr")}
+            disabled={loadingMode !== null}
+            class="btn-primary px-4 py-2 capitalize"
+          >
+            {loadingMode === "qr" ? "generating..." : "generate qr code"}
+          </button>
+          {#if codes.length}
             <button
               onclick={() => window.print()}
-              class="px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors capitalize"
+              class="ml-auto px-4 py-2 rounded-md border border-border text-foreground font-medium hover:bg-secondary transition-colors capitalize"
             >
               print
             </button>
@@ -69,9 +95,9 @@
         </div>
       </div>
 
-      {#if barcodes.length}
+      {#if codes.length}
         <div class="grid grid-cols-2 gap-4 print:gap-2" id="barcode-grid">
-          {#each barcodes as b}
+          {#each codes as b}
             <div
               class="flex flex-col items-center justify-center gap-1 rounded-lg border border-border bg-card p-4"
             >
@@ -80,7 +106,11 @@
                   {b.value}: {b.error}
                 </div>
               {:else}
-                <div class="[&_svg]:max-w-full [&_svg]:h-auto">
+                <div
+                  class={mode === "qr"
+                    ? "[&_svg]:size-40 [&_svg]:max-w-full [&_svg]:h-auto"
+                    : "[&_svg]:max-w-full [&_svg]:h-auto"}
+                >
                   {@html b.svg}
                 </div>
                 <span class="text-xs font-mono text-foreground">{b.value}</span>

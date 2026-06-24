@@ -1,6 +1,11 @@
 <script>
+  import { QueryClient, setQueryClientContext } from "@tanstack/svelte-query";
   import { router } from "./lib/router.svelte.js";
   import Work from "./routes/Work.svelte";
+
+  setQueryClientContext(
+    new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }),
+  );
   import Crypto from "./routes/Crypto.svelte";
   import Monitor from "./routes/Monitor.svelte";
   import ArgoCDPage from "./routes/ArgoCD.svelte";

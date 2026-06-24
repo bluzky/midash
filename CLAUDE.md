@@ -162,6 +162,8 @@ export function myIndicator({ period = 14 } = {}) {
 
 Use `get`, `post`, `del` from `assets/svelte/lib/api.js`. CSRF token is read from the Phoenix-injected meta tag automatically.
 
+For data fetching patterns, source functions, caching, and `DataWidget` usage see **`docs/widget-guide.md`**.
+
 ## Task Management
 
 Use **Trekker** (`trekker` CLI) to manage tasks. Data is stored in `.trekker/trekker.db`.

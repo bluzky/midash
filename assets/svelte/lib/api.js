@@ -16,7 +16,16 @@ async function request(method, path, body) {
   return data;
 }
 
-export const get = (path) => request("GET", path);
+// Deduplicate concurrent GET requests to the same URL.
+const getInflight = new Map();
+
+export function get(path) {
+  if (getInflight.has(path)) return getInflight.get(path);
+  const p = request("GET", path).finally(() => getInflight.delete(path));
+  getInflight.set(path, p);
+  return p;
+}
+
 export const post = (path, body) => request("POST", path, body);
 export const put = (path, body) => request("PUT", path, body);
 export const del = (path) => request("DELETE", path);

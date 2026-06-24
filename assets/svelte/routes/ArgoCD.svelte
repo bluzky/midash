@@ -5,40 +5,25 @@
   import Spinner from "../components/Spinner.svelte";
   import ConfigDialog from "../components/ConfigDialog.svelte";
   import { Settings2 } from "@lucide/svelte";
+  import { createQuery } from "@tanstack/svelte-query";
   import { get } from "../lib/api.js";
   import { configFieldsFor, configTitleFor } from "../lib/config-schema.js";
 
   const CONFIG_KEY = "ARGOCD_URL";
 
-  let apps = $state([]);
-  let loading = $state(true);
-  let error = $state(null);
+  const q = createQuery(() => ({
+    queryKey: ["/api/argocd/apps"],
+    queryFn: () => get("/api/argocd/apps").then((r) => r.data),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  }));
+
   let configOpen = $state(false);
 
-  async function fetchApps() {
-    loading = true;
-    error = null;
-    try {
-      const res = await get("/api/argocd/apps");
-      apps = res.data;
-    } catch (e) {
-      error = e.message;
-    } finally {
-      loading = false;
-    }
-  }
-
-  fetchApps();
-
-  $effect(() => {
-    const interval = setInterval(fetchApps, 60_000);
-    return () => clearInterval(interval);
-  });
-
   let grouped = $derived({
-    prod: apps.filter((a) => a.name?.toLowerCase().includes("prod")),
-    stg: apps.filter((a) => a.name?.toLowerCase().includes("stg")),
-    other: apps.filter(
+    prod: (q.data ?? []).filter((a) => a.name?.toLowerCase().includes("prod")),
+    stg: (q.data ?? []).filter((a) => a.name?.toLowerCase().includes("stg")),
+    other: (q.data ?? []).filter(
       (a) =>
         !a.name?.toLowerCase().includes("prod") &&
         !a.name?.toLowerCase().includes("stg"),
@@ -94,17 +79,17 @@
 {/snippet}
 
 <DashboardLayout>
-  {#if loading}
+  {#if q.isPending}
     <Col span={12}>
       <Spinner />
     </Col>
-  {:else if error}
+  {:else if q.isError}
     <Col span={12}>
       <Widget title="argocd">
         <div
           class="flex flex-col items-center justify-center gap-3 py-4 text-center"
         >
-          <div class="text-destructive text-sm">{error}</div>
+          <div class="text-destructive text-sm">{q.error.message}</div>
           <button
             onclick={() => (configOpen = true)}
             class="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm text-foreground hover:bg-secondary transition-colors"
@@ -145,5 +130,5 @@
   bind:open={configOpen}
   title={configTitleFor(CONFIG_KEY)}
   fields={configFieldsFor(CONFIG_KEY)}
-  onSaved={fetchApps}
+  onSaved={q.refetch}
 />
