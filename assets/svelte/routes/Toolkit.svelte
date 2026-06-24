@@ -1,7 +1,14 @@
 <script>
   import DashboardLayout from "../components/DashboardLayout.svelte";
   import { navigate } from "../lib/router.svelte.js";
-  import { Terminal, Barcode, Globe, FileCode, Braces } from "@lucide/svelte";
+  import {
+    Terminal,
+    Barcode,
+    Globe,
+    FileCode,
+    Braces,
+    Database,
+  } from "@lucide/svelte";
 
   const TOOLS = [
     {
@@ -41,6 +48,13 @@
       description: "Convert Elixir map syntax to prettified JSON",
       path: "/toolkit/map-to-json",
       icon: Braces,
+    },
+    {
+      id: "ecto-sql",
+      label: "Ecto Log → SQL",
+      description: "Replace Ecto $n placeholders with logged params",
+      path: "/toolkit/ecto-sql",
+      icon: Database,
     },
   ];
 

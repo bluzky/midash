@@ -15,6 +15,7 @@
   import PostBin from "./routes/toolkit/PostBin.svelte";
   import Mau from "./routes/toolkit/Mau.svelte";
   import MapToJson from "./routes/toolkit/MapToJson.svelte";
+  import EctoSql from "./routes/toolkit/EctoSql.svelte";
 </script>
 
 {#if router.path === "/" || router.path === "/work"}
@@ -37,6 +38,8 @@
   <Mau />
 {:else if router.path === "/toolkit/map-to-json"}
   <MapToJson />
+{:else if router.path === "/toolkit/ecto-sql"}
+  <EctoSql />
 {:else}
   <Work />
 {/if}
